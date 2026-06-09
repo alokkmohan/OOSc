@@ -179,7 +179,7 @@ function getStudents(district, block, school) {
 }
 
 // ─────────────────────────────────────────
-// API: Save / Update Verification (Upsert)
+// API: Save Verification — marks student as Yes
 // ─────────────────────────────────────────
 function saveVerification(data) {
   try {
@@ -194,27 +194,14 @@ function saveVerification(data) {
       }
     }
 
-    var admDate = '';
-    if (data.admissionDate && data.admissionDate !== '') {
-      try { admDate = new Date(data.admissionDate); } catch(e) { admDate = ''; }
-    }
-
     var row = [
-      new Date(),                      // A  Timestamp
-      data.pen           || '',        // B  Student PEN
-      data.studentName   || '',        // C  Student Name
-      data.district      || '',        // D  District
-      data.block         || '',        // E  Block
-      data.lastSchool    || '',        // F  Last School
-      data.verifiedClass || '',        // G  Verified Class
-      data.stream        || '',        // H  Stream
-      data.cycle         || '',        // I  Cycle
-      admDate,                         // J  Admission Date
-      data.rollNo        || '',        // K  Roll Number
-      data.fee           || '',        // L  Fee
-      data.remarks       || '',        // M  Remarks
-      data.verifiedBy    || '',        // N  Verified By
-      data.status        || 'Verified' // O  Status
+      new Date(),               // A  Timestamp
+      data.pen          || '',  // B  Student PEN
+      data.studentName  || '',  // C  Student Name
+      data.district     || '',  // D  District
+      data.block        || '',  // E  Block
+      data.lastSchool   || '',  // F  Last School
+      'Yes'                     // G  Verified
     ];
 
     if (existingRow > 0) {
@@ -223,7 +210,7 @@ function saveVerification(data) {
       sheet.appendRow(row);
     }
 
-    return { success: true, message: 'Verification successfully saved!' };
+    return { success: true, message: 'Student verified!' };
 
   } catch(err) {
     return { success: false, message: 'Error: ' + err.toString() };
@@ -257,11 +244,7 @@ function _getOrCreateVerSheet() {
   var sheet = ss.getSheetByName(VERIFICATIONS_SHEET);
   if (!sheet) {
     sheet = ss.insertSheet(VERIFICATIONS_SHEET);
-    var hdrs = [
-      'Timestamp', 'Student PEN', 'Student Name', 'District', 'Block',
-      'Last School Name', 'Verified Class', 'Stream', 'Cycle',
-      'Admission Date', 'Roll Number', 'Fee', 'Remarks', 'Verified By', 'Status'
-    ];
+    var hdrs = ['Timestamp', 'Student PEN', 'Student Name', 'District', 'Block', 'Last School', 'Verified'];
     sheet.getRange(1, 1, 1, hdrs.length).setValues([hdrs])
          .setFontWeight('bold')
          .setBackground('#4361ee')
@@ -287,20 +270,11 @@ function _getVerMap() {
     var r   = data[i];
     var pen = _c(String(r[1]));
     if (!pen) continue;
-    var admDate = r[9];
     map[pen] = {
-      status:        _c(String(r[14])) || 'Verified',
-      verifiedClass: _c(String(r[6])),
-      stream:        _c(String(r[7])),
-      cycle:         _c(String(r[8])),
-      admissionDate: admDate instanceof Date
-                       ? Utilities.formatDate(admDate, tz, 'yyyy-MM-dd') : '',
-      rollNo:        _c(String(r[10])),
-      fee:           _c(String(r[11])),
-      remarks:       _c(String(r[12])),
-      verifiedBy:    _c(String(r[13])),
-      timestamp:     r[0] instanceof Date
-                       ? Utilities.formatDate(r[0], tz, 'dd/MM/yyyy HH:mm') : ''
+      status:    'Verified',
+      verified:  _c(String(r[6])),
+      timestamp: r[0] instanceof Date
+                   ? Utilities.formatDate(r[0], tz, 'dd/MM/yyyy HH:mm') : ''
     };
   }
   return map;

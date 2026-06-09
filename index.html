@@ -8,9 +8,9 @@
   <title>Dropout Verification Portal</title>
   <style>
     :root{
-      --pri:#4361ee;--ok:#2dc653;--warn:#f8961e;--err:#f72585;--info:#4cc9f0;
+      --pri:#4361ee;--ok:#2dc653;--warn:#f8961e;--err:#f72585;
       --bg:#f0f2f7;--card:#fff;--bdr:#e2e8f0;--txt:#1e293b;--muted:#64748b;
-      --r:13px;--sh:0 1px 3px rgba(0,0,0,.07),0 3px 10px rgba(0,0,0,.05);
+      --r:12px;--sh:0 1px 3px rgba(0,0,0,.07),0 3px 10px rgba(0,0,0,.05);
     }
     @media(prefers-color-scheme:dark){
       :root{--bg:#0f172a;--card:#1e293b;--bdr:#334155;--txt:#f1f5f9;--muted:#94a3b8}
@@ -18,125 +18,98 @@
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
          background:var(--bg);color:var(--txt);min-height:100dvh;-webkit-font-smoothing:antialiased}
-    .hdr{background:linear-gradient(135deg,#4361ee,#3a0ca3);color:#fff;padding:13px 16px;
-         text-align:center;position:sticky;top:0;z-index:200;box-shadow:0 2px 14px rgba(67,97,238,.4)}
-    .hdr h1{font-size:1.08rem;font-weight:800;letter-spacing:-.01em}
-    .hdr p{font-size:.69rem;opacity:.78;margin-top:2px}
-    .page{max-width:800px;margin:0 auto;padding:10px 10px 60px}
-    .card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:13px;margin-bottom:9px}
-    .lbl{display:block;font-size:.66rem;font-weight:700;color:var(--muted);
+    .hdr{background:linear-gradient(135deg,#4361ee,#3a0ca3);color:#fff;padding:12px 16px;
+         text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(67,97,238,.4)}
+    .hdr h1{font-size:1rem;font-weight:800}
+    .hdr p{font-size:.68rem;opacity:.78;margin-top:1px}
+    .page{max-width:760px;margin:0 auto;padding:10px 10px 60px}
+    .card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:12px;margin-bottom:9px}
+    .lbl{display:block;font-size:.65rem;font-weight:700;color:var(--muted);
          text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
-    select,input,textarea{
-      display:block;width:100%;padding:9px 11px;background:var(--card);
+    select,input{display:block;width:100%;padding:9px 11px;background:var(--card);
       border:1.5px solid var(--bdr);border-radius:8px;font-size:.87rem;color:var(--txt);
-      -webkit-appearance:none;appearance:none;transition:border-color .13s
-    }
-    select{padding-right:27px;
+      -webkit-appearance:none;appearance:none;transition:border-color .13s}
+    select{padding-right:26px;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
       background-repeat:no-repeat;background-position:right 9px center}
     select:disabled{opacity:.5}
-    select:focus,input:focus,textarea:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 3px rgba(67,97,238,.14)}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;
-         padding:10px 17px;border:none;border-radius:9px;font-size:.86rem;font-weight:700;
-         cursor:pointer;transition:transform .12s,opacity .12s;
+    select:focus,input:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 3px rgba(67,97,238,.14)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;
+         padding:9px 16px;border:none;border-radius:8px;font-size:.84rem;font-weight:700;
+         cursor:pointer;transition:transform .1s,opacity .12s;
          -webkit-tap-highlight-color:transparent;touch-action:manipulation}
-    .btn:disabled{opacity:.45;cursor:not-allowed}
-    .btn:active:not(:disabled){transform:scale(.97)}
-    .bp{background:var(--pri);color:#fff} .bo{background:var(--ok);color:#fff}
-    .bw{background:var(--warn);color:#fff} .bsec{background:var(--bdr);color:var(--txt)}
-    .bsm{padding:6px 12px;font-size:.78rem;border-radius:7px}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .btn:active:not(:disabled){transform:scale(.96)}
+    .bp{background:var(--pri);color:#fff}
+    .bv{background:var(--ok);color:#fff}
+    .bsec{background:var(--bdr);color:var(--txt)}
+    .bsm{padding:6px 14px;font-size:.78rem;border-radius:7px}
     .bfull{width:100%}
-    .fg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:9px}
-    @media(max-width:520px){.fg{grid-template-columns:1fr;gap:7px}}
-    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
-    @media(max-width:420px){.stats{grid-template-columns:repeat(2,1fr)}}
-    .stat{background:var(--card);border-radius:var(--r);padding:11px 6px;text-align:center;box-shadow:var(--sh)}
-    .stat .n{font-size:1.65rem;font-weight:900;line-height:1}
-    .stat .l{font-size:.62rem;color:var(--muted);margin-top:2px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
-    .st .n{color:var(--pri)} .sp .n{color:var(--warn)} .sv .n{color:var(--info)} .sa .n{color:var(--ok)}
-    .badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:.63rem;
-           font-weight:800;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;flex-shrink:0}
-    .bpen{background:#fff3cd;color:#92400e} .bver{background:#cff4fc;color:#0c4a6e}
-    .badm{background:#dcfce7;color:#14532d}
-    .pills{display:flex;gap:5px;flex-wrap:wrap}
-    .pill{padding:5px 12px;border-radius:20px;font-size:.71rem;font-weight:700;
-          cursor:pointer;border:2px solid transparent;transition:all .12s;
-          -webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
+    .fg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:9px}
+    @media(max-width:500px){.fg{grid-template-columns:1fr;gap:7px}}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:9px}
+    .stat{background:var(--card);border-radius:var(--r);padding:10px 6px;text-align:center;box-shadow:var(--sh)}
+    .stat .n{font-size:1.7rem;font-weight:900;line-height:1}
+    .stat .l{font-size:.61rem;color:var(--muted);margin-top:2px;font-weight:700;text-transform:uppercase}
+    .st .n{color:var(--pri)} .sp .n{color:var(--warn)} .sv .n{color:var(--ok)}
+    .pills{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
+    .pill{padding:5px 13px;border-radius:20px;font-size:.71rem;font-weight:700;
+          cursor:pointer;transition:all .12s;-webkit-tap-highlight-color:transparent;user-select:none}
     .pa{background:#e2e8f0;color:var(--txt)} .pa.on{background:var(--pri);color:#fff}
-    .pp{background:#fff3cd;color:#92400e}   .pp.on{background:var(--warn);color:#fff}
-    .pv{background:#cff4fc;color:#0c4a6e}  .pv.on{background:var(--info);color:#fff}
-    .pm{background:#dcfce7;color:#14532d}  .pm.on{background:var(--ok);color:#fff}
-    .srw{position:relative}
-    .srw input{padding-left:33px}
-    .sri{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:.83rem}
+    .pp{background:#fff3cd;color:#92400e}    .pp.on{background:var(--warn);color:#fff}
+    .pv{background:#dcfce7;color:#14532d}    .pv.on{background:var(--ok);color:#fff}
+    .srw{position:relative;margin-bottom:9px}
+    .srw input{padding-left:32px}
+    .sri{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.8rem;pointer-events:none}
     .slist{display:flex;flex-direction:column;gap:7px}
-    .sc{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:12px;border-left:3px solid var(--bdr)}
-    @media(hover:hover){.sc:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(0,0,0,.1)}}
-    .sc.pending{border-left-color:var(--warn)} .sc.verified{border-left-color:var(--info)} .sc.admitted{border-left-color:var(--ok)}
-    .stop{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:7px}
-    .sname{font-weight:800;font-size:.92rem}
-    .ssub{font-size:.69rem;color:var(--muted);margin-top:2px}
-    .sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 7px;margin-bottom:9px}
-    @media(max-width:380px){.sgrid{grid-template-columns:repeat(2,1fr)}}
-    .sk .k{font-size:.62rem;color:var(--muted)} .sk .v{font-size:.75rem;font-weight:700}
-    .vib{background:#f8faff;border:1px solid #dbe8ff;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:.72rem}
-    .vit{font-weight:800;color:var(--pri);margin-bottom:4px;font-size:.72rem}
-    .vig{display:grid;grid-template-columns:repeat(3,1fr);gap:3px 7px}
-    .ske{animation:shim 1.3s infinite;background:linear-gradient(90deg,#f0f0f0 25%,#e4e4e4 50%,#f0f0f0 75%);background-size:200% 100%;border-radius:6px}
+    .sc{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);
+        padding:11px 12px;border-left:4px solid var(--bdr);transition:box-shadow .13s}
+    .sc.pending{border-left-color:var(--warn)}
+    .sc.verified{border-left-color:var(--ok);background:#f0fdf4}
+    @media(prefers-color-scheme:dark){.sc.verified{background:#052e16}}
+    .sc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+    .sc-name{font-weight:800;font-size:.93rem}
+    .sc-pen{font-size:.67rem;color:var(--muted);margin-top:1px}
+    .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.62rem;
+           font-weight:800;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+    .bpend{background:#fff3cd;color:#92400e}
+    .bverif{background:#dcfce7;color:#14532d}
+    .sc-info{display:grid;grid-template-columns:repeat(3,1fr);gap:3px 8px;margin:7px 0 9px}
+    @media(max-width:360px){.sc-info{grid-template-columns:repeat(2,1fr)}}
+    .si .k{font-size:.61rem;color:var(--muted)} .si .v{font-size:.74rem;font-weight:700}
+    .vdate{font-size:.67rem;color:var(--ok);font-weight:700;margin-bottom:8px}
+    .pager{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 0;flex-wrap:wrap}
+    .pgi{font-size:.76rem;color:var(--muted);font-weight:600}
+    .ske{animation:shim 1.3s infinite;background:linear-gradient(90deg,#f0f0f0 25%,#e4e4e4 50%,#f0f0f0 75%);background-size:200% 100%;border-radius:5px}
     @keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
-    .skc{background:var(--card);border-radius:var(--r);padding:12px;box-shadow:var(--sh)}
-    .skr{display:flex;justify-content:space-between;gap:8px;margin-bottom:9px}
-    .skl{height:12px;margin-bottom:4px} .skbg{width:56px;height:20px;flex-shrink:0;border-radius:10px}
-    .skg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:9px}
-    .skce{height:28px} .skbt{width:86px;height:28px;border-radius:7px}
-    .pager{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 0 3px;flex-wrap:wrap}
-    .pgi{font-size:.77rem;color:var(--muted);font-weight:600}
-    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:500;
-             overflow-y:auto;padding:16px 10px;align-items:flex-start;justify-content:center;
-             backdrop-filter:blur(3px)}
+    .skc{background:var(--card);border-radius:var(--r);padding:11px;box-shadow:var(--sh)}
+    .skr{display:flex;justify-content:space-between;gap:8px;margin-bottom:8px}
+    .skl{height:11px;margin-bottom:4px}
+    .skg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:8px}
+    .skce{height:26px} .skbt{width:70px;height:28px;border-radius:7px} .skbg{width:52px;height:18px;border-radius:10px;flex-shrink:0}
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;
+             align-items:flex-end;justify-content:center}
     .overlay.on{display:flex}
-    .sheet{background:var(--card);border-radius:var(--r);width:100%;max-width:500px;
-           margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden}
-    @media(max-width:580px){
-      .overlay{align-items:flex-end;padding:0}
-      .sheet{border-radius:20px 20px 0 0;max-height:92dvh;overflow-y:auto;margin:0;max-width:100%;
-             padding-bottom:env(safe-area-inset-bottom,10px);animation:sup .22s cubic-bezier(.25,.46,.45,.94)}
-      @keyframes sup{from{transform:translateY(100%)}}
-      .handle{display:block;width:34px;height:4px;background:var(--bdr);border-radius:2px;margin:10px auto 6px}
-    }
-    @media(min-width:581px){
-      .sheet{animation:pop .18s ease}
-      @keyframes pop{from{opacity:0;transform:scale(.96) translateY(-6px)}}
+    .cbox{background:var(--card);width:100%;max-width:420px;border-radius:18px 18px 0 0;
+          padding:20px 18px 30px;animation:sup .2s ease}
+    @keyframes sup{from{transform:translateY(100%)}}
+    .handle{width:32px;height:4px;background:var(--bdr);border-radius:2px;margin:0 auto 14px}
+    .cbox h3{font-size:.96rem;font-weight:800;margin-bottom:4px}
+    .cbox .cn{font-size:.82rem;color:var(--muted);margin-bottom:16px}
+    .cbox .crow{display:flex;gap:8px}
+    @media(min-width:460px){
+      .overlay{align-items:center}
+      .cbox{border-radius:14px;padding:20px 18px 22px;max-width:380px;animation:cpop .18s ease}
+      @keyframes cpop{from{opacity:0;transform:scale(.95)}}
       .handle{display:none}
     }
-    .shdr{background:linear-gradient(135deg,#4361ee,#3a0ca3);color:#fff;padding:13px 14px;
-          display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-    .shdr h3{font-size:.92rem;font-weight:800}
-    .shdr .sub{font-size:.7rem;opacity:.82;margin-top:2px;max-width:calc(100% - 34px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .cbtn{background:rgba(255,255,255,.2);border:none;color:#fff;width:26px;height:26px;
-          border-radius:50%;font-size:.87rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-    .sbody{padding:13px}
-    .snap{background:linear-gradient(135deg,#f0f4ff,#e8f0ff);border:1px solid #c7d7ff;border-radius:9px;padding:10px 12px;margin-bottom:12px}
-    .sna{font-weight:800;color:var(--pri);font-size:.92rem}
-    .snb{font-size:.7rem;color:var(--muted);margin-top:3px;display:flex;flex-wrap:wrap;gap:7px}
-    .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    @media(max-width:360px){.fgrid{grid-template-columns:1fr}}
-    .ff{grid-column:1/-1}
-    .sftr{padding:11px 13px;background:var(--bg);display:flex;gap:7px;justify-content:flex-end}
-    .sechdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px;margin-bottom:9px}
-    .sect{font-size:.86rem;font-weight:800} .secc{font-size:.71rem;color:var(--muted)}
-    .estate{text-align:center;padding:36px 20px;color:var(--muted)}
-    .estate p{font-size:.82rem}
-    .ldg{text-align:center;padding:24px;color:var(--muted);font-size:.82rem}
-    .spinner{width:28px;height:28px;border:3px solid var(--bdr);border-top-color:var(--pri);
-             border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
-    @keyframes spin{to{transform:rotate(360deg)}}
+    .estate{text-align:center;padding:36px 16px;color:var(--muted);font-size:.82rem}
     .tb{position:fixed;top:12px;right:12px;z-index:1000;display:flex;flex-direction:column;gap:6px;pointer-events:none}
-    .toast{background:var(--card);border-radius:9px;padding:10px 13px;box-shadow:0 4px 20px rgba(0,0,0,.15);
-           font-size:.8rem;max-width:270px;border-left:3px solid var(--pri);animation:tin .22s ease;pointer-events:all;color:var(--txt)}
+    .toast{background:var(--card);border-radius:9px;padding:9px 13px;box-shadow:0 4px 20px rgba(0,0,0,.15);
+           font-size:.79rem;max-width:260px;border-left:3px solid var(--pri);animation:tin .2s ease;pointer-events:all;color:var(--txt)}
     .tok{border-left-color:var(--ok)} .terr{border-left-color:var(--err)}
     @keyframes tin{from{transform:translateX(110%);opacity:0}}
-    .hidden{display:none!important} .mb9{margin-bottom:9px} .mt4{margin-top:4px}
+    .hidden{display:none!important} .mb9{margin-bottom:9px}
   </style>
 </head>
 <body>
@@ -163,28 +136,25 @@
     </div>
     <button class="btn bp bfull" id="btnL" disabled onclick="load()">View Students</button>
   </div>
-  <div class="stats mb9 hidden" id="statsW">
+
+  <div class="stats hidden" id="statsW">
     <div class="stat st"><div class="n" id="sT">0</div><div class="l">Total</div></div>
     <div class="stat sp"><div class="n" id="sP">0</div><div class="l">Pending</div></div>
     <div class="stat sv"><div class="n" id="sV">0</div><div class="l">Verified</div></div>
-    <div class="stat sa"><div class="n" id="sA">0</div><div class="l">Admitted</div></div>
   </div>
+
   <div id="stuW" class="hidden">
     <div class="card">
-      <div class="sechdr">
-        <span class="sect">Students</span>
-        <span class="secc" id="sCnt"></span>
-      </div>
-      <div class="srw mb9">
-        <span class="sri">S</span>
-        <input type="search" id="srch" placeholder="Search name, PEN, father name..." oninput="onSrch()">
-      </div>
       <div class="pills" id="pills">
         <span class="pill pa on" data-f="all">All</span>
         <span class="pill pp" data-f="pending">Pending</span>
         <span class="pill pv" data-f="verified">Verified</span>
-        <span class="pill pm" data-f="admitted">Admitted</span>
       </div>
+      <div class="srw">
+        <span class="sri">S</span>
+        <input type="search" id="srch" placeholder="Search name, PEN, father name..." oninput="onSrch()">
+      </div>
+      <div style="font-size:.71rem;color:var(--muted)" id="sCnt"></div>
     </div>
     <div id="skelW" class="hidden"><div class="slist" id="skel"></div></div>
     <div class="slist" id="sList"></div>
@@ -193,87 +163,23 @@
       <span class="pgi" id="pgi"></span>
       <button class="btn bsec bsm" id="bNext" onclick="gp(1)">Next &rarr;</button>
     </div>
-    <div class="estate hidden" id="emptyS"><p>No students found</p></div>
+    <div class="estate hidden" id="emptyS">No students found</div>
   </div>
 </main>
+
+<!-- Confirm Modal -->
 <div class="overlay" id="ov" onclick="bgc(event)">
-  <div class="sheet" id="sheet">
+  <div class="cbox">
     <div class="handle"></div>
-    <div class="shdr">
-      <div>
-        <h3>Verification Form</h3>
-        <div class="sub" id="mSub"></div>
-      </div>
-      <button class="cbtn" onclick="close2()">&times;</button>
-    </div>
-    <div class="sbody">
-      <div class="snap">
-        <div class="sna" id="mNm"></div>
-        <div class="snb"><span id="mPen"></span><span id="mEl"></span><span id="mGn"></span></div>
-        <div class="snb mt4"><span id="mFa"></span><span id="mMo"></span></div>
-      </div>
-      <div class="fgrid">
-        <div>
-          <label class="lbl">Class *</label>
-          <select id="fC">
-            <option value="">-- Select --</option>
-            <option>1</option><option>2</option><option>3</option><option>4</option>
-            <option>5</option><option>6</option><option>7</option><option>8</option>
-            <option>9</option><option>10</option><option>11</option><option>12</option>
-          </select>
-        </div>
-        <div>
-          <label class="lbl">Stream</label>
-          <select id="fSt">
-            <option value="">-- NA --</option>
-            <option>Science</option><option>Commerce</option>
-            <option>Arts</option><option>Vocational</option>
-          </select>
-        </div>
-        <div>
-          <label class="lbl">Cycle</label>
-          <select id="fCy">
-            <option value="">-- Select --</option>
-            <option value="I">Cycle I</option>
-            <option value="II">Cycle II</option>
-            <option value="Annual">Annual</option>
-          </select>
-        </div>
-        <div>
-          <label class="lbl">Admission Date</label>
-          <input type="date" id="fD">
-        </div>
-        <div>
-          <label class="lbl">Roll Number</label>
-          <input type="text" id="fR" placeholder="Roll No.">
-        </div>
-        <div>
-          <label class="lbl">Fee (Rs.)</label>
-          <input type="number" id="fF" placeholder="0" min="0">
-        </div>
-        <div class="ff">
-          <label class="lbl">Status *</label>
-          <select id="fSs">
-            <option value="Verified">Verified</option>
-            <option value="Admitted">Admitted</option>
-          </select>
-        </div>
-        <div class="ff">
-          <label class="lbl">Verified By &mdash; School Name *</label>
-          <input type="text" id="fB" placeholder="School name...">
-        </div>
-        <div class="ff">
-          <label class="lbl">Remarks</label>
-          <textarea id="fRe" rows="2" placeholder="Any notes..."></textarea>
-        </div>
-      </div>
-    </div>
-    <div class="sftr">
-      <button class="btn bsec" onclick="close2()">Cancel</button>
-      <button class="btn bo" id="saveBtn" onclick="save()">Save</button>
+    <h3>Confirm Verification</h3>
+    <div class="cn" id="cInfo"></div>
+    <div class="crow">
+      <button class="btn bsec bfull" onclick="close2()">Cancel</button>
+      <button class="btn bv bfull" id="cfmBtn" onclick="doVerify()">Yes, Verified</button>
     </div>
   </div>
 </div>
+
 <script>
 'use strict';
 const API='https://script.google.com/macros/s/AKfycbxthPPTtfw0QjfqUszjWd2RAHk9uZ7Yd1BwC2Hg3k6WsvvZuRXZW4mpsDp6lYUozDeM/exec';
@@ -291,22 +197,19 @@ async function api(p){
   return j;
 }
 
-// Instant client-side dropdowns - no extra API call
 function onDist(){
   const d=g('selD').value;
   rst('selB','-- Select Block --');rst('selS','-- Select School --');
   g('btnL').disabled=true;
   if(!d) return;
-  const blist=hier.blocks[d]||[];
-  blist.forEach(function(v){g('selB').innerHTML+=opt(v)});
+  (hier.blocks[d]||[]).forEach(function(v){g('selB').innerHTML+=opt(v)});
   g('selB').disabled=false;
 }
 function onBlock(){
   const d=g('selD').value,b=g('selB').value;
   rst('selS','-- Select School --');g('btnL').disabled=true;
   if(!b) return;
-  const slist=hier.schools[d+'||'+b]||[];
-  slist.forEach(function(v){g('selS').innerHTML+=opt(v)});
+  (hier.schools[d+'||'+b]||[]).forEach(function(v){g('selS').innerHTML+=opt(v)});
   g('selS').disabled=false;
 }
 function onSchool(){g('btnL').disabled=!g('selS').value}
@@ -322,8 +225,9 @@ async function load(){
   try{
     const r=await api({action:'getStudents',district:d,block:b,school:s});
     allS=r.students||[];
-    g('sT').textContent=r.total||0;g('sP').textContent=r.pending||0;
-    g('sV').textContent=r.verified||0;g('sA').textContent=r.admitted||0;
+    g('sT').textContent=r.total||0;
+    g('sP').textContent=r.pending||0;
+    g('sV').textContent=r.verified||0;
     hideSkel();filt=allS;pg=1;render();
     btn.disabled=false;btn.textContent='Refresh';
     toast('Loaded '+(r.total||0)+' students','tok');
@@ -347,30 +251,26 @@ function render(){
     g('bPrev').disabled=pg===1;g('bNext').disabled=pg===pages;
   }else hide('pager');
 }
+
 function card(s,idx){
-  const sl=s.status.toLowerCase();
-  const bl={pending:'bpen',verified:'bver',admitted:'badm'}[sl]||'bpen';
-  let vi='';
-  if(s.verInfo){
-    const v=s.verInfo;
-    vi='<div class="vib"><div class="vit">Verification <small style="font-weight:400;color:#888">'+h(v.timestamp)+'</small></div>'
-      +'<div class="vig">'+vc('Class',v.verifiedClass)+vc('Stream',v.stream)+vc('Cycle',v.cycle)
-      +vc('Roll',v.rollNo)+vc('Fee',v.fee?'Rs.'+v.fee:'')+vc('Date',v.admissionDate)+vc('By',v.verifiedBy)+'</div>'
-      +(v.remarks?'<div style="margin-top:4px;color:#555;font-size:.69rem">Note: '+h(v.remarks)+'</div>':'')+'</div>';
-  }
-  const bc=sl==='pending'?'bp':'bw';
-  const bt=sl==='pending'?'Verify':'Update';
-  return '<div class="sc '+sl+'">'
-    +'<div class="stop"><div><div class="sname">'+h(s.name||'--')+'</div>'
-    +'<div class="ssub">PEN:'+h(s.pen||'--')+' &middot; '+h(s.gender||'--')+' &middot; Cl.'+h(s.eligibleClass||s.lastClass||'--')+'</div></div>'
-    +'<span class="badge '+bl+'">'+h(s.status)+'</span></div>'
-    +'<div class="sgrid">'+sf('Father',s.fatherName)+sf('Mother',s.motherName)+sf('Mobile',s.mobile)
-    +sf('Prev Cl','Cl.'+(s.lastClass||'--'))+sf('Eligible','Cl.'+(s.eligibleClass||'--'))+sf('Status',s.subStatus)+'</div>'
-    +vi+'<button class="btn '+bc+' bsm" onclick="openM('+idx+')">'+bt+'</button></div>';
+  const done=s.status==='Verified';
+  return '<div class="sc '+(done?'verified':'pending')+'">'
+    +'<div class="sc-top"><div>'
+    +'<div class="sc-name">'+h(s.name||'--')+'</div>'
+    +'<div class="sc-pen">PEN: '+h(s.pen||'--')+' &middot; '+h(s.gender||'--')+'</div>'
+    +'</div>'
+    +'<span class="badge '+(done?'bverif':'bpend')+'">'+(done?'Verified':'Pending')+'</span>'
+    +'</div>'
+    +'<div class="sc-info">'
+    +si('Father',s.fatherName)+si('Mother',s.motherName)+si('Mobile',s.mobile)
+    +'</div>'
+    +(done&&s.verInfo?'<div class="vdate">Verified on: '+h(s.verInfo.timestamp)+'</div>':'')
+    +(done?'':'<button class="btn bv bsm" onclick="confirm2('+idx+')">Verify</button>')
+    +'</div>';
 }
-const sf=function(k,v){return '<div class="sk"><div class="k">'+k+'</div><div class="v">'+h(v||'--')+'</div></div>'};
-const vc=function(k,v){return v?'<div><div class="k">'+k+'</div><div class="v">'+h(v)+'</div></div>':''};
+const si=function(k,v){return '<div class="si"><div class="k">'+k+'</div><div class="v">'+h(v||'--')+'</div></div>'};
 function gp(d){pg+=d;render();scrollTo({top:0,behavior:'smooth'})}
+
 document.getElementById('pills').addEventListener('click',function(e){
   const p=e.target.closest('[data-f]');if(!p) return;
   fm=p.dataset.f;rPills();p.classList.add('on');pg=1;applyF();
@@ -381,71 +281,47 @@ function applyF(){
   filt=allS.filter(function(s){
     const fo=fm==='all'||s.status.toLowerCase()===fm;
     const so=!q||(s.name||'').toLowerCase().includes(q)||(s.pen||'').toLowerCase().includes(q)
-             ||(s.fatherName||'').toLowerCase().includes(q)||(s.motherName||'').toLowerCase().includes(q);
+             ||(s.fatherName||'').toLowerCase().includes(q);
     return fo&&so;
   });
   render();
 }
-function openM(idx){
-  const s=filt[idx];if(!s) return;cur=s;
-  g('mNm').textContent=s.name||'--';
-  g('mSub').textContent=s.lastSchool||'';
-  g('mPen').textContent='PEN: '+(s.pen||'--');
-  g('mEl').textContent='Cl.'+(s.eligibleClass||s.lastClass||'--');
-  g('mGn').textContent=s.gender||'';
-  g('mFa').textContent='Father: '+(s.fatherName||'--');
-  g('mMo').textContent='Mobile: '+(s.mobile||'N/A');
-  if(s.verInfo){
-    const v=s.verInfo;
-    sv('fC',v.verifiedClass||'');sv('fSt',v.stream||'');sv('fCy',v.cycle||'');
-    sv('fD',v.admissionDate||'');sv('fR',v.rollNo||'');sv('fF',v.fee||'');
-    sv('fRe',v.remarks||'');sv('fB',v.verifiedBy||'');sv('fSs',v.status||'Verified');
-  }else{
-    sv('fC',s.eligibleClass||'');sv('fSt','');sv('fCy','');
-    sv('fD',tod());sv('fR','');sv('fF','');sv('fRe','');sv('fB','');sv('fSs','Verified');
-  }
+
+function confirm2(idx){
+  cur=filt[idx];if(!cur) return;
+  g('cInfo').textContent=cur.name+(cur.fatherName?' (Father: '+cur.fatherName+')':'')+' &mdash; Are you sure this student is verified?';
   g('ov').classList.add('on');document.body.style.overflow='hidden';
 }
 function close2(){g('ov').classList.remove('on');document.body.style.overflow='';cur=null}
 function bgc(e){if(e.target===g('ov'))close2()}
-async function save(){
+
+async function doVerify(){
   if(!cur) return;
-  if(!g('fC').value){toast('Please select a Class','terr');return}
-  if(!g('fB').value.trim()){toast('Verified By field required','terr');return}
-  const btn=g('saveBtn');
+  const btn=g('cfmBtn');
   btn.disabled=true;btn.textContent='Saving...';
   const data={
-    pen:cur.pen,studentName:cur.name,district:cur.district,block:cur.block,lastSchool:cur.lastSchool,
-    verifiedClass:g('fC').value,stream:g('fSt').value,cycle:g('fCy').value,
-    admissionDate:g('fD').value,rollNo:g('fR').value.trim(),fee:g('fF').value,
-    remarks:g('fRe').value.trim(),verifiedBy:g('fB').value.trim(),status:g('fSs').value
+    pen:cur.pen,studentName:cur.name,
+    district:cur.district,block:cur.block,lastSchool:cur.lastSchool
   };
   try{
     const r=await api({action:'save',data:JSON.stringify(data)});
-    btn.disabled=false;btn.textContent='Save';
+    btn.disabled=false;btn.textContent='Yes, Verified';
     if(r.success){
-      toast(r.message,'tok');
-      cur.status=data.status;
-      cur.verInfo={status:data.status,verifiedClass:data.verifiedClass,stream:data.stream,
-        cycle:data.cycle,admissionDate:data.admissionDate,rollNo:data.rollNo,fee:data.fee,
-        remarks:data.remarks,verifiedBy:data.verifiedBy,
-        timestamp:new Date().toLocaleString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})};
-      close2();applyF();updS();
+      cur.status='Verified';
+      cur.verInfo={timestamp:new Date().toLocaleString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})};
+      close2();applyF();
+      g('sV').textContent=allS.filter(function(s){return s.status==='Verified'}).length;
+      g('sP').textContent=allS.filter(function(s){return s.status==='Pending'}).length;
+      toast('Student verified!','tok');
     }else toast(r.message,'terr');
-  }catch(e){btn.disabled=false;btn.textContent='Save';toast('Save failed: '+e.message,'terr')}
+  }catch(e){btn.disabled=false;btn.textContent='Yes, Verified';toast('Failed: '+e.message,'terr')}
 }
-function updS(){
-  g('sT').textContent=allS.length;
-  g('sP').textContent=allS.filter(function(s){return s.status==='Pending'}).length;
-  g('sV').textContent=allS.filter(function(s){return s.status==='Verified'}).length;
-  g('sA').textContent=allS.filter(function(s){return s.status==='Admitted'}).length;
-}
+
 function showSkel(n){
   g('skel').innerHTML=Array(n).fill(0).map(function(){
-    return '<div class="skc"><div class="skr"><div style="flex:1"><div class="ske skl" style="width:52%"></div>'
-      +'<div class="ske skl" style="width:68%"></div></div><div class="ske skbg"></div></div>'
-      +'<div class="skg"><div class="ske skce"></div><div class="ske skce"></div><div class="ske skce"></div>'
-      +'<div class="ske skce"></div><div class="ske skce"></div><div class="ske skce"></div></div>'
+    return '<div class="skc"><div class="skr"><div style="flex:1"><div class="ske skl" style="width:50%"></div>'
+      +'<div class="ske skl" style="width:35%"></div></div><div class="ske skbg"></div></div>'
+      +'<div class="skg"><div class="ske skce"></div><div class="ske skce"></div><div class="ske skce"></div></div>'
       +'<div class="ske skbt"></div></div>';
   }).join('');
   show('skelW');
@@ -454,12 +330,9 @@ function hideSkel(){hide('skelW');g('skel').innerHTML=''}
 const g=function(id){return document.getElementById(id)};
 const show=function(id){g(id).classList.remove('hidden')};
 const hide=function(id){g(id).classList.add('hidden')};
-const sv=function(id,v){g(id).value=v};
 const opt=function(v){return '<option value="'+h(v)+'">'+h(v)+'</option>'};
 const rst=function(id,ph){var el=g(id);el.innerHTML='<option value="">'+ph+'</option>';el.disabled=true};
 const rPills=function(){document.querySelectorAll('.pill').forEach(function(p){p.classList.remove('on')})};
-const tod=function(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
-const pad=function(n){return String(n).padStart(2,'0')};
 const h=function(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')};
 function toast(msg,t){
   var el=document.createElement('div');
@@ -467,7 +340,6 @@ function toast(msg,t){
   setTimeout(function(){el.style.transition='opacity .26s';el.style.opacity='0';
     setTimeout(function(){if(el.parentNode)el.remove()},260)},3500);
 }
-// Load hierarchy once on page start
 (async function(){
   try{
     const data=await api({action:'getHierarchy'});
