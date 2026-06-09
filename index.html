@@ -236,13 +236,8 @@
       <!-- Fields to fill -->
       <div class="fgrid2">
         <div>
-          <label class="lbl">Class *</label>
-          <select id="aC">
-            <option value="">-- Select --</option>
-            <option>1</option><option>2</option><option>3</option><option>4</option>
-            <option>5</option><option>6</option><option>7</option><option>8</option>
-            <option>9</option><option>10</option><option>11</option><option>12</option>
-          </select>
+          <label class="lbl">Class (Auto)</label>
+          <input type="text" id="aC" readonly style="background:#f1f5f9;font-weight:700;color:var(--pri);cursor:not-allowed">
         </div>
         <div>
           <label class="lbl">Stream</label>
@@ -367,8 +362,7 @@ function card(s,idx){
   if(sl==='pending'){
     btns='<button class="btn bv bsm" onclick="openV('+idx+')">Verify</button>';
   }else if(sl==='verified'){
-    btns='<button class="btn bv bsm" onclick="openV('+idx+')">Re-verify</button>'
-        +'<button class="btn ba bsm" onclick="openA('+idx+')">Admit</button>';
+    btns='<button class="btn ba bsm" onclick="openA('+idx+')">Admit</button>';
   }else if(sl==='admitted'){
     btns='<button class="btn ba bsm" onclick="openA('+idx+')">Edit Admission</button>';
   }
@@ -442,25 +436,24 @@ function openA(idx){
   g('aGender').textContent=curA.gender||'--';
   g('aPen').textContent=curA.pen||'--';
   g('aElig').textContent='Cl.'+(curA.eligibleClass||curA.lastClass||'--');
-  // pre-fill from existing admission if any
+  // class is locked to eligibleClass — cannot be changed
+  const lockedClass=curA.eligibleClass||curA.lastClass||'';
+  g('aC').value=lockedClass;
   const a=curA.admInfo||{};
-  sv('aC',a.admClass||curA.eligibleClass||'');
-  sv('aSt',a.stream||'');
-  sv('aCy',a.cycle||'');
-  sv('aD',a.admDate||tod());
+  sv('aSt',a.stream||'');sv('aCy',a.cycle||'');sv('aD',a.admDate||tod());
   g('ovA').classList.add('on');document.body.style.overflow='hidden';
 }
 function closeA(){g('ovA').classList.remove('on');document.body.style.overflow='';curA=null}
 function bgcA(e){if(e.target===g('ovA'))closeA()}
 async function doAdmit(){
   if(!curA) return;
-  if(!g('aC').value){toast('Please select Class','terr');return}
+  if(!g('aC').value){toast('Eligible class not found for this student','terr');return}
   if(!g('aCy').value){toast('Please select Cycle','terr');return}
   const btn=g('admBtn');btn.disabled=true;btn.textContent='Saving...';
   const data={
     pen:curA.pen,studentName:curA.name,district:curA.district,
     block:curA.block,lastSchool:curA.lastSchool,gender:curA.gender,
-    admClass:g('aC').value,stream:g('aSt').value,
+    admClass:curA.eligibleClass||curA.lastClass||'',stream:g('aSt').value,
     cycle:g('aCy').value,admDate:g('aD').value
   };
   try{
