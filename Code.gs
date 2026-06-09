@@ -199,8 +199,9 @@ function _getSS() {
 }
 
 function _getDataRows() {
-  var sheet = _getSS().getSheetByName(DATA_SHEET_NAME);
-  if (!sheet) throw new Error("Sheet '" + DATA_SHEET_NAME + "' nahi mili.");
+  var ss    = _getSS();
+  var sheet = ss.getSheetByName(DATA_SHEET_NAME) || ss.getSheets()[0];
+  if (!sheet) throw new Error("Koi sheet nahi mili spreadsheet mein.");
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
   var cols = Math.max(sheet.getLastColumn(), 16);
