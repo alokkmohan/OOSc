@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#4361ee">
-  <meta name="description" content="Dropout Student Verification & Admission Management 2024-25">
   <title>Dropout Verification Portal</title>
   <style>
     :root{
@@ -16,37 +16,26 @@
       :root{--bg:#0f172a;--card:#1e293b;--bdr:#334155;--txt:#f1f5f9;--muted:#94a3b8}
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html{-webkit-text-size-adjust:100%}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
          background:var(--bg);color:var(--txt);min-height:100dvh;-webkit-font-smoothing:antialiased}
-
-    /* Header */
     .hdr{background:linear-gradient(135deg,#4361ee,#3a0ca3);color:#fff;padding:13px 16px;
          text-align:center;position:sticky;top:0;z-index:200;box-shadow:0 2px 14px rgba(67,97,238,.4)}
     .hdr h1{font-size:1.08rem;font-weight:800;letter-spacing:-.01em}
     .hdr p{font-size:.69rem;opacity:.78;margin-top:2px}
-
-    /* Layout */
     .page{max-width:800px;margin:0 auto;padding:10px 10px 60px}
-
-    /* Card */
     .card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:13px;margin-bottom:9px}
-
-    /* Form elements */
     .lbl{display:block;font-size:.66rem;font-weight:700;color:var(--muted);
          text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
     select,input,textarea{
       display:block;width:100%;padding:9px 11px;background:var(--card);
       border:1.5px solid var(--bdr);border-radius:8px;font-size:.87rem;color:var(--txt);
-      -webkit-appearance:none;appearance:none;transition:border-color .13s,box-shadow .13s
+      -webkit-appearance:none;appearance:none;transition:border-color .13s
     }
     select{padding-right:27px;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
       background-repeat:no-repeat;background-position:right 9px center}
     select:disabled{opacity:.5}
     select:focus,input:focus,textarea:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 3px rgba(67,97,238,.14)}
-
-    /* Buttons */
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;
          padding:10px 17px;border:none;border-radius:9px;font-size:.86rem;font-weight:700;
          cursor:pointer;transition:transform .12s,opacity .12s;
@@ -57,46 +46,32 @@
     .bw{background:var(--warn);color:#fff} .bsec{background:var(--bdr);color:var(--txt)}
     .bsm{padding:6px 12px;font-size:.78rem;border-radius:7px}
     .bfull{width:100%}
-
-    /* Filter grid */
     .fg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:9px}
     @media(max-width:520px){.fg{grid-template-columns:1fr;gap:7px}}
-
-    /* Stats */
     .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
     @media(max-width:420px){.stats{grid-template-columns:repeat(2,1fr)}}
     .stat{background:var(--card);border-radius:var(--r);padding:11px 6px;text-align:center;box-shadow:var(--sh)}
     .stat .n{font-size:1.65rem;font-weight:900;line-height:1}
-    .stat .l{font-size:.62rem;color:var(--muted);margin-top:2px;font-weight:700;
-             text-transform:uppercase;letter-spacing:.3px}
+    .stat .l{font-size:.62rem;color:var(--muted);margin-top:2px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
     .st .n{color:var(--pri)} .sp .n{color:var(--warn)} .sv .n{color:var(--info)} .sa .n{color:var(--ok)}
-
-    /* Badges */
     .badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:.63rem;
            font-weight:800;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;flex-shrink:0}
     .bpen{background:#fff3cd;color:#92400e} .bver{background:#cff4fc;color:#0c4a6e}
     .badm{background:#dcfce7;color:#14532d}
-
-    /* Filter pills */
     .pills{display:flex;gap:5px;flex-wrap:wrap}
     .pill{padding:5px 12px;border-radius:20px;font-size:.71rem;font-weight:700;
           cursor:pointer;border:2px solid transparent;transition:all .12s;
           -webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
-    .pa{background:#e2e8f0;color:var(--txt)}  .pa.on{background:var(--pri);color:#fff}
-    .pp{background:#fff3cd;color:#92400e}     .pp.on{background:var(--warn);color:#fff}
-    .pv{background:#cff4fc;color:#0c4a6e}     .pv.on{background:var(--info);color:#fff}
-    .pm{background:#dcfce7;color:#14532d}     .pm.on{background:var(--ok);color:#fff}
-
-    /* Search */
+    .pa{background:#e2e8f0;color:var(--txt)} .pa.on{background:var(--pri);color:#fff}
+    .pp{background:#fff3cd;color:#92400e}   .pp.on{background:var(--warn);color:#fff}
+    .pv{background:#cff4fc;color:#0c4a6e}  .pv.on{background:var(--info);color:#fff}
+    .pm{background:#dcfce7;color:#14532d}  .pm.on{background:var(--ok);color:#fff}
     .srw{position:relative}
     .srw input{padding-left:33px}
-    .sri{position:absolute;left:10px;top:50%;transform:translateY(-50%);
-         color:var(--muted);pointer-events:none;font-size:.83rem}
-
-    /* Student list */
-    .slist{display:flex;flex-direction:column;gap:7px;contain:layout}
+    .sri{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+    .slist{display:flex;flex-direction:column;gap:7px}
     .sc{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:12px;
-        border-left:3px solid var(--bdr);contain:layout style;will-change:transform}
+        border-left:3px solid var(--bdr)}
     @media(hover:hover){.sc:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(0,0,0,.1)}}
     .sc.pending{border-left-color:var(--warn)} .sc.verified{border-left-color:var(--info)}
     .sc.admitted{border-left-color:var(--ok)}
@@ -106,15 +81,10 @@
     .sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 7px;margin-bottom:9px}
     @media(max-width:380px){.sgrid{grid-template-columns:repeat(2,1fr)}}
     .sk .k{font-size:.62rem;color:var(--muted)} .sk .v{font-size:.75rem;font-weight:700}
-
-    /* Verification info box */
     .vib{background:#f8faff;border:1px solid #dbe8ff;border-radius:8px;padding:8px 10px;
          margin-bottom:8px;font-size:.72rem}
     .vit{font-weight:800;color:var(--pri);margin-bottom:4px;font-size:.72rem}
     .vig{display:grid;grid-template-columns:repeat(3,1fr);gap:3px 7px}
-    @media(max-width:380px){.vig{grid-template-columns:repeat(2,1fr)}}
-
-    /* Skeleton shimmer */
     .ske{animation:shim 1.3s infinite;
          background:linear-gradient(90deg,#f0f0f0 25%,#e4e4e4 50%,#f0f0f0 75%);
          background-size:200% 100%;border-radius:6px}
@@ -126,20 +96,14 @@
     .skg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:9px}
     .skce{height:28px}
     .skbt{width:86px;height:28px;border-radius:7px}
-
-    /* Pagination */
-    .pager{display:flex;align-items:center;justify-content:center;gap:8px;
-           padding:12px 0 3px;flex-wrap:wrap}
+    .pager{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 0 3px;flex-wrap:wrap}
     .pgi{font-size:.77rem;color:var(--muted);font-weight:600}
-
-    /* Modal / Bottom sheet */
     .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:500;
              overflow-y:auto;padding:16px 10px;align-items:flex-start;justify-content:center;
-             backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+             backdrop-filter:blur(3px)}
     .overlay.on{display:flex}
     .sheet{background:var(--card);border-radius:var(--r);width:100%;max-width:500px;
            margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden}
-
     @media(max-width:580px){
       .overlay{align-items:flex-end;padding:0}
       .sheet{border-radius:20px 20px 0 0;max-height:92dvh;overflow-y:auto;
@@ -154,7 +118,6 @@
       @keyframes pop{from{opacity:0;transform:scale(.96) translateY(-6px)}}
       .handle{display:none}
     }
-
     .shdr{background:linear-gradient(135deg,#4361ee,#3a0ca3);color:#fff;padding:13px 14px;
           display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
     .shdr h3{font-size:.92rem;font-weight:800}
@@ -163,98 +126,71 @@
     .cbtn{background:rgba(255,255,255,.2);border:none;color:#fff;width:26px;height:26px;
           border-radius:50%;font-size:.87rem;cursor:pointer;flex-shrink:0;
           display:flex;align-items:center;justify-content:center}
-
     .sbody{padding:13px}
     .snap{background:linear-gradient(135deg,#f0f4ff,#e8f0ff);border:1px solid #c7d7ff;
           border-radius:9px;padding:10px 12px;margin-bottom:12px}
     .sna{font-weight:800;color:var(--pri);font-size:.92rem}
     .snb{font-size:.7rem;color:var(--muted);margin-top:3px;display:flex;flex-wrap:wrap;gap:7px}
-
     .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media(max-width:360px){.fgrid{grid-template-columns:1fr}}
     .ff{grid-column:1/-1}
-
     .sftr{padding:11px 13px;background:var(--bg);display:flex;gap:7px;justify-content:flex-end}
-
-    /* Sections */
-    .sechdr{display:flex;align-items:center;justify-content:space-between;
-            flex-wrap:wrap;gap:7px;margin-bottom:9px}
+    .sechdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px;margin-bottom:9px}
     .sect{font-size:.86rem;font-weight:800}
     .secc{font-size:.71rem;color:var(--muted)}
-
-    /* Empty / error */
     .estate{text-align:center;padding:36px 20px;color:var(--muted)}
-    .eico{font-size:2.4rem;margin-bottom:7px}
+    .eico{font-size:2rem;margin-bottom:7px}
     .estate p{font-size:.82rem}
-
-    /* Toast */
     .tb{position:fixed;top:12px;right:12px;z-index:1000;
         display:flex;flex-direction:column;gap:6px;pointer-events:none}
     .toast{background:var(--card);border-radius:9px;padding:10px 13px;
            box-shadow:0 4px 20px rgba(0,0,0,.15);font-size:.8rem;max-width:270px;
-           border-left:3px solid var(--pri);animation:tin .22s ease;
-           pointer-events:all;color:var(--txt)}
+           border-left:3px solid var(--pri);animation:tin .22s ease;pointer-events:all;color:var(--txt)}
     .tok{border-left-color:var(--ok)} .terr{border-left-color:var(--err)}
     @keyframes tin{from{transform:translateX(110%);opacity:0}}
-
     .hidden{display:none!important}
     .mb9{margin-bottom:9px} .mt4{margin-top:4px}
   </style>
 </head>
 <body>
-
 <header class="hdr">
-  <h1>ðŸ“‹ Dropout Verification Portal</h1>
-  <p>Verification & Admission Management â€” 2024-25</p>
+  <h1>Dropout Verification Portal</h1>
+  <p>Verification &amp; Admission Management &mdash; 2024-25</p>
 </header>
-
 <div class="tb" id="tb"></div>
-
 <main class="page">
-
-  <!-- Filter -->
   <div class="card">
     <div class="fg">
       <div>
         <label class="lbl">District</label>
-        <select id="selD" onchange="onDist()"><option value="">Loadingâ€¦</option></select>
+        <select id="selD" onchange="onDist()"><option value="">Loading...</option></select>
       </div>
       <div>
         <label class="lbl">Block</label>
-        <select id="selB" disabled onchange="onBlock()">
-          <option value="">â€” Select Block â€”</option>
-        </select>
+        <select id="selB" disabled onchange="onBlock()"><option value="">-- Select Block --</option></select>
       </div>
       <div>
         <label class="lbl">School</label>
-        <select id="selS" disabled onchange="onSchool()">
-          <option value="">â€” Select School â€”</option>
-        </select>
+        <select id="selS" disabled onchange="onSchool()"><option value="">-- Select School --</option></select>
       </div>
     </div>
-    <button class="btn bp bfull" id="btnL" disabled onclick="load()">
-      ðŸ‘ View Students
-    </button>
+    <button class="btn bp bfull" id="btnL" disabled onclick="load()">View Students</button>
   </div>
-
-  <!-- Stats -->
   <div class="stats mb9 hidden" id="statsW">
     <div class="stat st"><div class="n" id="sT">0</div><div class="l">Total</div></div>
     <div class="stat sp"><div class="n" id="sP">0</div><div class="l">Pending</div></div>
     <div class="stat sv"><div class="n" id="sV">0</div><div class="l">Verified</div></div>
     <div class="stat sa"><div class="n" id="sA">0</div><div class="l">Admitted</div></div>
   </div>
-
-  <!-- Students -->
   <div id="stuW" class="hidden">
     <div class="card">
       <div class="sechdr">
-        <span class="sect">ðŸ‘¨â€ðŸŽ“ Students</span>
+        <span class="sect">Students</span>
         <span class="secc" id="sCnt"></span>
       </div>
       <div class="srw mb9">
-        <span class="sri">ðŸ”</span>
-        <input type="search" id="srch" placeholder="Search name, PEN, father's nameâ€¦" oninput="onSrch()">
+        <span class="sri">S</span>
+        <input type="search" id="srch" placeholder="Search name, PEN, father name..." oninput="onSrch()">
       </div>
       <div class="pills" id="pills">
         <span class="pill pa on" data-f="all">All</span>
@@ -263,56 +199,39 @@
         <span class="pill pm" data-f="admitted">Admitted</span>
       </div>
     </div>
-
-    <!-- Skeleton -->
-    <div id="skelW" class="hidden">
-      <div class="slist" id="skel"></div>
-    </div>
-
-    <!-- List -->
+    <div id="skelW" class="hidden"><div class="slist" id="skel"></div></div>
     <div class="slist" id="sList"></div>
-
-    <!-- Pager -->
     <div class="pager hidden" id="pager">
-      <button class="btn bsec bsm" id="bPrev" onclick="gp(-1)">â† Prev</button>
+      <button class="btn bsec bsm" id="bPrev" onclick="gp(-1)">&larr; Prev</button>
       <span class="pgi" id="pgi"></span>
-      <button class="btn bsec bsm" id="bNext" onclick="gp(1)">Next â†’</button>
+      <button class="btn bsec bsm" id="bNext" onclick="gp(1)">Next &rarr;</button>
     </div>
-
-    <!-- Empty -->
     <div class="estate hidden" id="emptyS">
-      <div class="eico">ðŸ”Ž</div><p>No students found</p>
+      <div class="eico">[ ]</div><p>No students found</p>
     </div>
   </div>
-
 </main>
-
-<!-- Bottom Sheet / Modal -->
 <div class="overlay" id="ov" onclick="bgc(event)">
   <div class="sheet" id="sheet">
     <div class="handle"></div>
     <div class="shdr">
       <div>
-        <h3>âœ… Verification Form</h3>
+        <h3>Verification Form</h3>
         <div class="sub" id="mSub"></div>
       </div>
-      <button class="cbtn" onclick="close2()">âœ•</button>
+      <button class="cbtn" onclick="close2()">&times;</button>
     </div>
     <div class="sbody">
       <div class="snap">
         <div class="sna" id="mNm"></div>
-        <div class="snb">
-          <span id="mPen"></span><span id="mEl"></span><span id="mGn"></span>
-        </div>
-        <div class="snb mt4">
-          <span id="mFa"></span><span id="mMo"></span>
-        </div>
+        <div class="snb"><span id="mPen"></span><span id="mEl"></span><span id="mGn"></span></div>
+        <div class="snb mt4"><span id="mFa"></span><span id="mMo"></span></div>
       </div>
       <div class="fgrid">
         <div>
           <label class="lbl">Class *</label>
           <select id="fC">
-            <option value="">â€” Select â€”</option>
+            <option value="">-- Select --</option>
             <option>1</option><option>2</option><option>3</option><option>4</option>
             <option>5</option><option>6</option><option>7</option><option>8</option>
             <option>9</option><option>10</option><option>11</option><option>12</option>
@@ -321,7 +240,7 @@
         <div>
           <label class="lbl">Stream</label>
           <select id="fSt">
-            <option value="">â€” NA â€”</option>
+            <option value="">-- NA --</option>
             <option>Science</option><option>Commerce</option>
             <option>Arts</option><option>Vocational</option>
           </select>
@@ -329,7 +248,7 @@
         <div>
           <label class="lbl">Cycle</label>
           <select id="fCy">
-            <option value="">â€” Select â€”</option>
+            <option value="">-- Select --</option>
             <option value="I">Cycle I</option>
             <option value="II">Cycle II</option>
             <option value="Annual">Annual</option>
@@ -344,7 +263,7 @@
           <input type="text" id="fR" placeholder="Roll No.">
         </div>
         <div>
-          <label class="lbl">Fee (â‚¹)</label>
+          <label class="lbl">Fee (Rs.)</label>
           <input type="number" id="fF" placeholder="0" min="0">
         </div>
         <div class="ff">
@@ -355,33 +274,26 @@
           </select>
         </div>
         <div class="ff">
-          <label class="lbl">Verified By â€” School Name *</label>
-          <input type="text" id="fB" placeholder="School nameâ€¦">
+          <label class="lbl">Verified By &mdash; School Name *</label>
+          <input type="text" id="fB" placeholder="School name...">
         </div>
         <div class="ff">
           <label class="lbl">Remarks</label>
-          <textarea id="fRe" rows="2" placeholder="Any notesâ€¦"></textarea>
+          <textarea id="fRe" rows="2" placeholder="Any notes..."></textarea>
         </div>
       </div>
     </div>
     <div class="sftr">
       <button class="btn bsec" onclick="close2()">Cancel</button>
-      <button class="btn bo" id="saveBtn" onclick="save()">ðŸ’¾ Save</button>
+      <button class="btn bo" id="saveBtn" onclick="save()">Save</button>
     </div>
   </div>
 </div>
-
 <script>
 'use strict';
-// â”€â”€ Config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Update API_URL after a new Apps Script deployment
-const API = 'https://script.google.com/macros/s/AKfycbxthPPTtfw0QjfqUszjWd2RAHk9uZ7Yd1BwC2Hg3k6WsvvZuRXZW4mpsDp6lYUozDeM/exec';
-const PS  = 30; // page size
-
-// â”€â”€ State â”€â”€
-let allS=[], filt=[], pg=1, fm='all', st=null, cur=null;
-
-// â”€â”€ API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const API='https://script.google.com/macros/s/AKfycbxthPPTtfw0QjfqUszjWd2RAHk9uZ7Yd1BwC2Hg3k6WsvvZuRXZW4mpsDp6lYUozDeM/exec';
+const PS=30;
+let allS=[],filt=[],pg=1,fm='all',st=null,cur=null;
 async function api(p){
   const u=new URL(API);
   for(const[k,v] of Object.entries(p)) u.searchParams.set(k,String(v));
@@ -391,63 +303,57 @@ async function api(p){
   if(j&&j.error) throw new Error(j.error);
   return j;
 }
-
-// â”€â”€ Dropdowns â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function onDist(){
   const d=g('selD').value;
-  rst('selB','â€” Select Block â€”'); rst('selS','â€” Select School â€”');
+  rst('selB','-- Select Block --');rst('selS','-- Select School --');
   g('btnL').disabled=true;
   if(!d) return;
-  g('selB').innerHTML='<option>Loadingâ€¦</option>';
+  g('selB').innerHTML='<option>Loading...</option>';
   try{
     const l=await api({action:'getBlocks',district:d});
-    rst('selB','â€” Select Block â€”');
+    rst('selB','-- Select Block --');
     l.forEach(v=>g('selB').innerHTML+=opt(v));
     g('selB').disabled=false;
-  }catch(e){toast('Failed to load blocks','err')}
+  }catch(e){toast('Failed to load blocks','terr')}
 }
 async function onBlock(){
   const d=g('selD').value,b=g('selB').value;
-  rst('selS','â€” Select School â€”'); g('btnL').disabled=true;
+  rst('selS','-- Select School --');g('btnL').disabled=true;
   if(!b) return;
-  g('selS').innerHTML='<option>Loadingâ€¦</option>';
+  g('selS').innerHTML='<option>Loading...</option>';
   try{
     const l=await api({action:'getSchools',district:d,block:b});
-    rst('selS','â€” Select School â€”');
+    rst('selS','-- Select School --');
     l.forEach(v=>g('selS').innerHTML+=opt(v));
     g('selS').disabled=false;
-  }catch(e){toast('Failed to load schools','err')}
+  }catch(e){toast('Failed to load schools','terr')}
 }
 function onSchool(){g('btnL').disabled=!g('selS').value}
-
-// â”€â”€ Load â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function load(){
   const d=g('selD').value,b=g('selB').value,s=g('selS').value;
-  if(!d||!b||!s){toast('Select district, block and school','err');return}
+  if(!d||!b||!s){toast('Select district, block and school','terr');return}
   const btn=g('btnL');
-  btn.disabled=true; btn.innerHTML='â³ Loadingâ€¦';
-  show('statsW'); show('stuW');
-  g('sList').innerHTML=''; showSkel(5);
-  g('srch').value=''; fm='all'; rPills();
+  btn.disabled=true;btn.textContent='Loading...';
+  show('statsW');show('stuW');
+  g('sList').innerHTML='';showSkel(5);
+  g('srch').value='';fm='all';rPills();
   try{
     const r=await api({action:'getStudents',district:d,block:b,school:s});
     allS=r.students||[];
-    g('sT').textContent=r.total||0; g('sP').textContent=r.pending||0;
-    g('sV').textContent=r.verified||0; g('sA').textContent=r.admitted||0;
-    hideSkel(); filt=allS; pg=1; render();
-    btn.disabled=false; btn.innerHTML='ðŸ”„ Refresh';
-    toast('Loaded '+(r.total||0)+' students','ok');
+    g('sT').textContent=r.total||0;g('sP').textContent=r.pending||0;
+    g('sV').textContent=r.verified||0;g('sA').textContent=r.admitted||0;
+    hideSkel();filt=allS;pg=1;render();
+    btn.disabled=false;btn.textContent='Refresh';
+    toast('Loaded '+(r.total||0)+' students','tok');
   }catch(e){
-    hideSkel(); btn.disabled=false; btn.innerHTML='ðŸ‘ View Students';
-    toast('Load failed: '+e.message,'err');
+    hideSkel();btn.disabled=false;btn.textContent='View Students';
+    toast('Load failed: '+e.message,'terr');
   }
 }
-
-// â”€â”€ Render (paginated) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function render(){
-  const tot=filt.length, pages=Math.max(1,Math.ceil(tot/PS));
+  const tot=filt.length,pages=Math.max(1,Math.ceil(tot/PS));
   pg=Math.min(pg,pages);
-  const s=(pg-1)*PS, e2=Math.min(s+PS,tot);
+  const s=(pg-1)*PS,e2=Math.min(s+PS,tot);
   g('sCnt').textContent=tot+' students';
   if(!tot){g('sList').innerHTML='';show('emptyS');hide('pager');return}
   hide('emptyS');
@@ -455,51 +361,42 @@ function render(){
   if(tot>PS){
     show('pager');
     g('pgi').textContent='Page '+pg+' / '+pages;
-    g('bPrev').disabled=pg===1; g('bNext').disabled=pg===pages;
+    g('bPrev').disabled=pg===1;g('bNext').disabled=pg===pages;
   }else hide('pager');
 }
-
 function card(s,idx){
   const sl=s.status.toLowerCase();
   const bl={pending:'bpen',verified:'bver',admitted:'badm'}[sl]||'bpen';
-  const lb=s.status==='Admitted'?'Admitted âœ“':s.status==='Verified'?'Verified âœ“':'Pending';
   let vi='';
   if(s.verInfo){
     const v=s.verInfo;
-    vi=`<div class="vib"><div class="vit">ðŸ“Œ Verification <span style="font-weight:400;color:#888;font-size:.65rem">${h(v.timestamp)}</span></div>
-    <div class="vig">${vc('Class',v.verifiedClass)}${vc('Stream',v.stream)}${vc('Cycle',v.cycle)}
-    ${vc('Roll',v.rollNo)}${vc('Fee',v.fee?'â‚¹'+v.fee:'')}${vc('Date',v.admissionDate)}${vc('By',v.verifiedBy)}</div>
-    ${v.remarks?`<div style="margin-top:4px;color:#555;font-size:.69rem">ðŸ’¬ ${h(v.remarks)}</div>`:''}</div>`;
+    vi='<div class="vib"><div class="vit">Verification <small style="font-weight:400;color:#888">'+h(v.timestamp)+'</small></div>'
+      +'<div class="vig">'+vc('Class',v.verifiedClass)+vc('Stream',v.stream)+vc('Cycle',v.cycle)
+      +vc('Roll',v.rollNo)+vc('Fee',v.fee?'Rs.'+v.fee:'')+vc('Date',v.admissionDate)+vc('By',v.verifiedBy)+'</div>'
+      +(v.remarks?'<div style="margin-top:4px;color:#555;font-size:.69rem">Note: '+h(v.remarks)+'</div>':'')
+      +'</div>';
   }
   const bc=sl==='pending'?'bp':'bw';
-  const bt=sl==='pending'?'âœï¸ Verify':'âœï¸ Update';
-  return `<div class="sc ${sl}">
-    <div class="stop">
-      <div><div class="sname">${h(s.name||'â€”')}</div>
-      <div class="ssub">PEN:${h(s.pen||'â€”')} Â&middot; ${h(s.gender||'â€”')} Â&middot; Cl.${h(s.eligibleClass||s.lastClass||'â€”')}</div></div>
-      <span class="badge ${bl}">${lb}</span>
-    </div>
-    <div class="sgrid">
-      ${sf("Father",s.fatherName)}${sf("Mother",s.motherName)}${sf("Mobile",s.mobile)}
-      ${sf("Prev Cl","Cl."+(s.lastClass||'â€”'))}${sf("Eligible","Cl."+(s.eligibleClass||'â€”'))}${sf("Status",s.subStatus)}
-    </div>
-    ${vi}<button class="btn ${bc} bsm" onclick="openM(${idx})">${bt}</button>
-  </div>`;
+  const bt=sl==='pending'?'Verify':'Update';
+  return '<div class="sc '+sl+'">'
+    +'<div class="stop"><div><div class="sname">'+h(s.name||'--')+'</div>'
+    +'<div class="ssub">PEN:'+h(s.pen||'--')+' &middot; '+h(s.gender||'--')+' &middot; Cl.'+h(s.eligibleClass||s.lastClass||'--')+'</div></div>'
+    +'<span class="badge '+bl+'">'+h(s.status)+'</span></div>'
+    +'<div class="sgrid">'+sf('Father',s.fatherName)+sf('Mother',s.motherName)+sf('Mobile',s.mobile)
+    +sf('Prev Cl','Cl.'+(s.lastClass||'--'))+sf('Eligible','Cl.'+(s.eligibleClass||'--'))+sf('Status',s.subStatus)+'</div>'
+    +vi+'<button class="btn '+bc+' bsm" onclick="openM('+idx+')">'+bt+'</button></div>';
 }
-const sf=(k,v)=>`<div class="sk"><div class="k">${k}</div><div class="v">${h(v||'â€”')}</div></div>`;
-const vc=(k,v)=>v?`<div><div class="k">${k}</div><div class="v">${h(v)}</div></div>`:'';
-
+const sf=(k,v)=>'<div class="sk"><div class="k">'+k+'</div><div class="v">'+h(v||'--')+'</div></div>';
+const vc=(k,v)=>v?'<div><div class="k">'+k+'</div><div class="v">'+h(v)+'</div></div>':'';
 function gp(d){pg+=d;render();scrollTo({top:0,behavior:'smooth'})}
-
-// â”€â”€ Filter + Search â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-document.getElementById('pills').addEventListener('click',e=>{
+document.getElementById('pills').addEventListener('click',function(e){
   const p=e.target.closest('[data-f]');if(!p) return;
-  fm=p.dataset.f; rPills(); p.classList.add('on'); pg=1; applyF();
+  fm=p.dataset.f;rPills();p.classList.add('on');pg=1;applyF();
 });
-function onSrch(){clearTimeout(st);st=setTimeout(()=>{pg=1;applyF()},260)}
+function onSrch(){clearTimeout(st);st=setTimeout(function(){pg=1;applyF()},260)}
 function applyF(){
   const q=g('srch').value.toLowerCase().trim();
-  filt=allS.filter(s=>{
+  filt=allS.filter(function(s){
     const fo=fm==='all'||s.status.toLowerCase()===fm;
     const so=!q||(s.name||'').toLowerCase().includes(q)||(s.pen||'').toLowerCase().includes(q)
              ||(s.fatherName||'').toLowerCase().includes(q)||(s.motherName||'').toLowerCase().includes(q);
@@ -507,17 +404,15 @@ function applyF(){
   });
   render();
 }
-
-// â”€â”€ Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function openM(idx){
-  const s=filt[idx];if(!s) return; cur=s;
-  g('mNm').textContent =s.name||'â€”';
+  const s=filt[idx];if(!s) return;cur=s;
+  g('mNm').textContent=s.name||'--';
   g('mSub').textContent=s.lastSchool||'';
-  g('mPen').textContent='PEN: '+(s.pen||'â€”');
-  g('mEl').textContent ='Cl.'+(s.eligibleClass||s.lastClass||'â€”');
-  g('mGn').textContent =s.gender||'';
-  g('mFa').textContent ='Father: '+(s.fatherName||'â€”');
-  g('mMo').textContent ='ðŸ“± '+(s.mobile||'N/A');
+  g('mPen').textContent='PEN: '+(s.pen||'--');
+  g('mEl').textContent='Cl.'+(s.eligibleClass||s.lastClass||'--');
+  g('mGn').textContent=s.gender||'';
+  g('mFa').textContent='Father: '+(s.fatherName||'--');
+  g('mMo').textContent='Mobile: '+(s.mobile||'N/A');
   if(s.verInfo){
     const v=s.verInfo;
     sv('fC',v.verifiedClass||'');sv('fSt',v.stream||'');sv('fCy',v.cycle||'');
@@ -527,18 +422,16 @@ function openM(idx){
     sv('fC',s.eligibleClass||'');sv('fSt','');sv('fCy','');
     sv('fD',tod());sv('fR','');sv('fF','');sv('fRe','');sv('fB','');sv('fSs','Verified');
   }
-  g('ov').classList.add('on'); document.body.style.overflow='hidden';
+  g('ov').classList.add('on');document.body.style.overflow='hidden';
 }
 function close2(){g('ov').classList.remove('on');document.body.style.overflow='';cur=null}
 function bgc(e){if(e.target===g('ov'))close2()}
-
-// â”€â”€ Save â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function save(){
   if(!cur) return;
-  if(!g('fC').value){toast('Please select a Class','err');return}
-  if(!g('fB').value.trim()){toast('"Verified By" required','err');return}
+  if(!g('fC').value){toast('Please select a Class','terr');return}
+  if(!g('fB').value.trim()){toast('Verified By field required','terr');return}
   const btn=g('saveBtn');
-  btn.disabled=true;btn.innerHTML='â³ Savingâ€¦';
+  btn.disabled=true;btn.textContent='Saving...';
   const data={
     pen:cur.pen,studentName:cur.name,district:cur.district,
     block:cur.block,lastSchool:cur.lastSchool,
@@ -548,65 +441,59 @@ async function save(){
   };
   try{
     const r=await api({action:'save',data:JSON.stringify(data)});
-    btn.disabled=false;btn.innerHTML='ðŸ’¾ Save';
+    btn.disabled=false;btn.textContent='Save';
     if(r.success){
-      toast('âœ… '+r.message,'ok');
+      toast(r.message,'tok');
       cur.status=data.status;
       cur.verInfo={status:data.status,verifiedClass:data.verifiedClass,stream:data.stream,
         cycle:data.cycle,admissionDate:data.admissionDate,rollNo:data.rollNo,fee:data.fee,
         remarks:data.remarks,verifiedBy:data.verifiedBy,
         timestamp:new Date().toLocaleString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})};
       close2();applyF();updS();
-    }else toast('âŒ '+r.message,'err');
-  }catch(e){btn.disabled=false;btn.innerHTML='ðŸ’¾ Save';toast('âŒ Save failed: '+e.message,'err')}
+    }else toast(r.message,'terr');
+  }catch(e){btn.disabled=false;btn.textContent='Save';toast('Save failed: '+e.message,'terr')}
 }
 function updS(){
   g('sT').textContent=allS.length;
-  g('sP').textContent=allS.filter(s=>s.status==='Pending').length;
-  g('sV').textContent=allS.filter(s=>s.status==='Verified').length;
-  g('sA').textContent=allS.filter(s=>s.status==='Admitted').length;
+  g('sP').textContent=allS.filter(function(s){return s.status==='Pending'}).length;
+  g('sV').textContent=allS.filter(function(s){return s.status==='Verified'}).length;
+  g('sA').textContent=allS.filter(function(s){return s.status==='Admitted'}).length;
 }
-
-// â”€â”€ Skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function showSkel(n){
-  g('skel').innerHTML=Array(n).fill(0).map(()=>`
-    <div class="skc"><div class="skr">
-      <div style="flex:1"><div class="ske skl" style="width:52%"></div><div class="ske skl" style="width:68%"></div></div>
-      <div class="ske skbg"></div></div>
-      <div class="skg">${Array(6).fill('<div class="ske skce"></div>').join('')}</div>
-      <div class="ske skbt"></div></div>`).join('');
+  g('skel').innerHTML=Array(n).fill(0).map(function(){
+    return '<div class="skc"><div class="skr"><div style="flex:1"><div class="ske skl" style="width:52%"></div>'
+      +'<div class="ske skl" style="width:68%"></div></div><div class="ske skbg"></div></div>'
+      +'<div class="skg"><div class="ske skce"></div><div class="ske skce"></div><div class="ske skce"></div>'
+      +'<div class="ske skce"></div><div class="ske skce"></div><div class="ske skce"></div></div>'
+      +'<div class="ske skbt"></div></div>';
+  }).join('');
   show('skelW');
 }
 function hideSkel(){hide('skelW');g('skel').innerHTML=''}
-
-// â”€â”€ Utilities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const g   =id=>document.getElementById(id);
-const show=id=>g(id).classList.remove('hidden');
-const hide=id=>g(id).classList.add('hidden');
-const sv  =(id,v)=>g(id).value=v;
-const opt =v=>`<option value="${h(v)}">${h(v)}</option>`;
-const rst =(id,ph)=>{const el=g(id);el.innerHTML=`<option value="">${ph}</option>`;el.disabled=true};
-const rPills=()=>document.querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));
-const tod=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
-const pad=n=>String(n).padStart(2,'0');
-const h=s=>String(s==null?'':s).replace(/&/g,'&').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-function toast(msg,t=''){
-  const el=document.createElement('div');
-  el.className='toast '+t;el.textContent=msg;g('tb').appendChild(el);
-  setTimeout(()=>{el.style.transition='opacity .26s';el.style.opacity='0';
-    setTimeout(()=>el.parentNode&&el.remove(),260)},3500);
+const g=function(id){return document.getElementById(id)};
+const show=function(id){g(id).classList.remove('hidden')};
+const hide=function(id){g(id).classList.add('hidden')};
+const sv=function(id,v){g(id).value=v};
+const opt=function(v){return '<option value="'+h(v)+'">'+h(v)+'</option>'};
+const rst=function(id,ph){var el=g(id);el.innerHTML='<option value="">'+ph+'</option>';el.disabled=true};
+const rPills=function(){document.querySelectorAll('.pill').forEach(function(p){p.classList.remove('on')})};
+const tod=function(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+const pad=function(n){return String(n).padStart(2,'0')};
+const h=function(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')};
+function toast(msg,t){
+  var el=document.createElement('div');
+  el.className='toast '+(t||'');el.textContent=msg;g('tb').appendChild(el);
+  setTimeout(function(){el.style.transition='opacity .26s';el.style.opacity='0';
+    setTimeout(function(){if(el.parentNode)el.remove()},260)},3500);
 }
-
-// â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-(async()=>{
+(async function(){
   try{
     const l=await api({action:'getDistricts'});
     const s=g('selD');
-    s.innerHTML='<option value="">â€” Select District â€”</option>';
-    l.forEach(d=>s.innerHTML+=opt(d));
-  }catch(e){g('selD').innerHTML='<option value="">Error</option>';toast('Districts failed: '+e.message,'err')}
+    s.innerHTML='<option value="">-- Select District --</option>';
+    l.forEach(function(d){s.innerHTML+=opt(d)});
+  }catch(e){g('selD').innerHTML='<option value="">Error loading</option>';toast('Districts failed: '+e.message,'terr')}
 })();
 </script>
 </body>
 </html>
-
