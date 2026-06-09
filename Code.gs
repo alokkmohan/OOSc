@@ -33,6 +33,7 @@ function doGet(e) {
     else if (action === 'getSchools')   result = getSchools(e.parameter.district, e.parameter.block);
     else if (action === 'getStudents')  result = getStudents(e.parameter.district, e.parameter.block, e.parameter.school);
     else if (action === 'save')         result = saveVerification(JSON.parse(e.parameter.data));
+    else if (action === 'admit')        result = saveAdmission(JSON.parse(e.parameter.data));
     else                                result = { error: 'Unknown action: ' + action };
 
     return ContentService.createTextOutput(JSON.stringify(result))
@@ -130,12 +131,12 @@ function getSchools(district, block) {
 }
 
 // ─────────────────────────────────────────
-// API: Students for District + Block + School
-// col Q (index 16) = "Verified (Yes/No)" in source sheet
+// API: Students — col Q=Verified, Admission sheet=Admitted
 // ─────────────────────────────────────────
 function getStudents(district, block, school) {
   var rows;
-  try { rows = _getDataRows(); } catch(e) { throw new Error('_getDataRows failed: ' + e.message); }
+  try { rows = _getDataRows(); } catch(e) { throw new Error('_getDataRows: ' + e.message); }
+  var admMap = _getAdmMap(); // PEN -> admission info
 
   var students = [];
   rows.forEach(function(row) {
@@ -145,6 +146,8 @@ function getStudents(district, block, school) {
 
     var pen      = _c(row[5]);
     var verified = _c(String(row[16])).toLowerCase() === 'yes';
+    var adm      = pen && admMap[pen] ? admMap[pen] : null;
+
     students.push({
       district:      _c(row[0]),
       block:         _c(row[1]),
@@ -158,17 +161,86 @@ function getStudents(district, block, school) {
       subStatus:     _c(row[12]),
       lastClass:     _c(row[13]),
       eligibleClass: _c(row[14]),
-      status:        verified ? 'Verified' : 'Pending',
-      verInfo:       verified ? { timestamp: _c(String(row[17])) } : null
+      status:        adm ? 'Admitted' : (verified ? 'Verified' : 'Pending'),
+      verInfo:       verified ? { timestamp: _c(String(row[17])) } : null,
+      admInfo:       adm
     });
   });
 
   return {
     students: students,
     total:    students.length,
-    verified: students.filter(function(s){ return s.status === 'Verified'; }).length,
-    pending:  students.filter(function(s){ return s.status === 'Pending';  }).length
+    admitted: students.filter(function(s){ return s.status === 'Admitted';  }).length,
+    verified: students.filter(function(s){ return s.status === 'Verified';  }).length,
+    pending:  students.filter(function(s){ return s.status === 'Pending';   }).length
   };
+}
+
+// ─────────────────────────────────────────
+// API: Save Admission to Admission sheet
+// ─────────────────────────────────────────
+function saveAdmission(data) {
+  try {
+    var sheet = _getOrCreateVerSheet(); // creates/gets Admission sheet
+    var allData = sheet.getDataRange().getValues();
+
+    var existingRow = -1;
+    for (var i = 1; i < allData.length; i++) {
+      if (_c(String(allData[i][1])) === _c(String(data.pen))) {
+        existingRow = i + 1; break;
+      }
+    }
+
+    var tz  = Session.getScriptTimeZone();
+    var row = [
+      new Date(),               // A Timestamp
+      data.pen          || '',  // B PEN
+      data.studentName  || '',  // C Name
+      data.district     || '',  // D District
+      data.block        || '',  // E Block
+      data.lastSchool   || '',  // F School
+      data.gender       || '',  // G Gender
+      data.admClass     || '',  // H Class
+      data.stream       || '',  // I Stream
+      data.cycle        || '',  // J Cycle
+      data.admDate      || '',  // K Admission Date
+    ];
+
+    if (existingRow > 0) {
+      sheet.getRange(existingRow, 1, 1, row.length).setValues([row]);
+    } else {
+      sheet.appendRow(row);
+    }
+    return { success: true, message: 'Admission saved!' };
+  } catch(err) {
+    return { success: false, message: 'Error: ' + err.toString() };
+  }
+}
+
+// ─────────────────────────────────────────
+// HELPER: PEN -> admission info map
+// ─────────────────────────────────────────
+function _getAdmMap() {
+  var ss    = _getSS();
+  var sheet = ss.getSheetByName(VERIFICATIONS_SHEET);
+  if (!sheet) return {};
+  var data = sheet.getDataRange().getValues();
+  if (data.length < 2) return {};
+  var tz  = Session.getScriptTimeZone();
+  var map = {};
+  for (var i = 1; i < data.length; i++) {
+    var r   = data[i];
+    var pen = _c(String(r[1]));
+    if (!pen) continue;
+    map[pen] = {
+      admClass:  _c(String(r[7])),
+      stream:    _c(String(r[8])),
+      cycle:     _c(String(r[9])),
+      admDate:   _c(String(r[10])),
+      timestamp: r[0] instanceof Date ? Utilities.formatDate(r[0], tz, 'dd/MM/yyyy HH:mm') : ''
+    };
+  }
+  return map;
 }
 
 // ─────────────────────────────────────────
@@ -242,11 +314,9 @@ function _getOrCreateVerSheet() {
   var sheet = ss.getSheetByName(VERIFICATIONS_SHEET);
   if (!sheet) {
     sheet = ss.insertSheet(VERIFICATIONS_SHEET);
-    var hdrs = ['Timestamp', 'Student PEN', 'Student Name', 'District', 'Block', 'Last School', 'Verified'];
+    var hdrs = ['Timestamp','PEN','Student Name','District','Block','School','Gender','Class','Stream','Cycle','Admission Date'];
     sheet.getRange(1, 1, 1, hdrs.length).setValues([hdrs])
-         .setFontWeight('bold')
-         .setBackground('#4361ee')
-         .setFontColor('white');
+         .setFontWeight('bold').setBackground('#4361ee').setFontColor('white');
     sheet.setFrozenRows(1);
     sheet.autoResizeColumns(1, hdrs.length);
   }

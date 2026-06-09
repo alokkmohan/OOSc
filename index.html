@@ -8,7 +8,7 @@
   <title>Dropout Verification Portal</title>
   <style>
     :root{
-      --pri:#4361ee;--ok:#2dc653;--warn:#f8961e;--err:#f72585;
+      --pri:#4361ee;--ok:#2dc653;--warn:#f8961e;--err:#f72585;--adm:#7c3aed;
       --bg:#f0f2f7;--card:#fff;--bdr:#e2e8f0;--txt:#1e293b;--muted:#64748b;
       --r:12px;--sh:0 1px 3px rgba(0,0,0,.07),0 3px 10px rgba(0,0,0,.05);
     }
@@ -40,33 +40,37 @@
          -webkit-tap-highlight-color:transparent;touch-action:manipulation}
     .btn:disabled{opacity:.4;cursor:not-allowed}
     .btn:active:not(:disabled){transform:scale(.96)}
-    .bp{background:var(--pri);color:#fff}
-    .bv{background:var(--ok);color:#fff}
-    .bsec{background:var(--bdr);color:var(--txt)}
-    .bsm{padding:6px 14px;font-size:.78rem;border-radius:7px}
+    .bp{background:var(--pri);color:#fff} .bv{background:var(--ok);color:#fff}
+    .ba{background:var(--adm);color:#fff} .bsec{background:var(--bdr);color:var(--txt)}
+    .bsm{padding:6px 13px;font-size:.77rem;border-radius:7px}
     .bfull{width:100%}
     .fg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:9px}
     @media(max-width:500px){.fg{grid-template-columns:1fr;gap:7px}}
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:9px}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:9px}
+    @media(max-width:440px){.stats{grid-template-columns:repeat(2,1fr)}}
     .stat{background:var(--card);border-radius:var(--r);padding:10px 6px;text-align:center;box-shadow:var(--sh)}
-    .stat .n{font-size:1.7rem;font-weight:900;line-height:1}
-    .stat .l{font-size:.61rem;color:var(--muted);margin-top:2px;font-weight:700;text-transform:uppercase}
-    .st .n{color:var(--pri)} .sp .n{color:var(--warn)} .sv .n{color:var(--ok)}
+    .stat .n{font-size:1.6rem;font-weight:900;line-height:1}
+    .stat .l{font-size:.6rem;color:var(--muted);margin-top:2px;font-weight:700;text-transform:uppercase}
+    .st .n{color:var(--pri)} .sp .n{color:var(--warn)} .sv .n{color:var(--ok)} .sa .n{color:var(--adm)}
     .pills{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
     .pill{padding:5px 13px;border-radius:20px;font-size:.71rem;font-weight:700;
           cursor:pointer;transition:all .12s;-webkit-tap-highlight-color:transparent;user-select:none}
-    .pa{background:#e2e8f0;color:var(--txt)} .pa.on{background:var(--pri);color:#fff}
-    .pp{background:#fff3cd;color:#92400e}    .pp.on{background:var(--warn);color:#fff}
-    .pv{background:#dcfce7;color:#14532d}    .pv.on{background:var(--ok);color:#fff}
+    .pa{background:#e2e8f0;color:var(--txt)}   .pa.on{background:var(--pri);color:#fff}
+    .pp{background:#fff3cd;color:#92400e}       .pp.on{background:var(--warn);color:#fff}
+    .pv{background:#dcfce7;color:#14532d}       .pv.on{background:var(--ok);color:#fff}
+    .pm{background:#ede9fe;color:#4c1d95}       .pm.on{background:var(--adm);color:#fff}
     .srw{position:relative;margin-bottom:9px}
     .srw input{padding-left:32px}
     .sri{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.8rem;pointer-events:none}
     .slist{display:flex;flex-direction:column;gap:7px}
     .sc{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);
-        padding:11px 12px;border-left:4px solid var(--bdr);transition:box-shadow .13s}
+        padding:11px 12px;border-left:4px solid var(--bdr)}
     .sc.pending{border-left-color:var(--warn)}
     .sc.verified{border-left-color:var(--ok);background:#f0fdf4}
-    @media(prefers-color-scheme:dark){.sc.verified{background:#052e16}}
+    .sc.admitted{border-left-color:var(--adm);background:#faf5ff}
+    @media(prefers-color-scheme:dark){
+      .sc.verified{background:#052e16} .sc.admitted{background:#2e1065}
+    }
     .sc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
     .sc-name{font-weight:800;font-size:.93rem}
     .sc-pen{font-size:.67rem;color:var(--muted);margin-top:1px}
@@ -74,10 +78,18 @@
            font-weight:800;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
     .bpend{background:#fff3cd;color:#92400e}
     .bverif{background:#dcfce7;color:#14532d}
-    .sc-info{display:grid;grid-template-columns:repeat(3,1fr);gap:3px 8px;margin:7px 0 9px}
+    .badmit{background:#ede9fe;color:#4c1d95}
+    .sc-info{display:grid;grid-template-columns:repeat(3,1fr);gap:3px 8px;margin:7px 0 8px}
     @media(max-width:360px){.sc-info{grid-template-columns:repeat(2,1fr)}}
     .si .k{font-size:.61rem;color:var(--muted)} .si .v{font-size:.74rem;font-weight:700}
-    .vdate{font-size:.67rem;color:var(--ok);font-weight:700;margin-bottom:8px}
+    .vdate{font-size:.67rem;font-weight:700;margin-bottom:7px}
+    .vdate.vc{color:var(--ok)} .vdate.ac{color:var(--adm)}
+    .adm-info{background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;
+              padding:7px 9px;margin-bottom:8px;font-size:.7rem}
+    .adm-info .atit{font-weight:800;color:var(--adm);margin-bottom:4px}
+    .adm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px 7px}
+    @media(prefers-color-scheme:dark){.adm-info{background:#1e1b4b;border-color:#4c1d95}}
+    .sc-btns{display:flex;gap:7px;flex-wrap:wrap}
     .pager{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 0;flex-wrap:wrap}
     .pgi{font-size:.76rem;color:var(--muted);font-weight:600}
     .ske{animation:shim 1.3s infinite;background:linear-gradient(90deg,#f0f0f0 25%,#e4e4e4 50%,#f0f0f0 75%);background-size:200% 100%;border-radius:5px}
@@ -87,22 +99,41 @@
     .skl{height:11px;margin-bottom:4px}
     .skg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:8px}
     .skce{height:26px} .skbt{width:70px;height:28px;border-radius:7px} .skbg{width:52px;height:18px;border-radius:10px;flex-shrink:0}
+    /* Sheet / Modal */
     .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;
              align-items:flex-end;justify-content:center}
     .overlay.on{display:flex}
-    .cbox{background:var(--card);width:100%;max-width:420px;border-radius:18px 18px 0 0;
-          padding:20px 18px 30px;animation:sup .2s ease}
+    .sheet{background:var(--card);width:100%;max-width:460px;
+           border-radius:18px 18px 0 0;max-height:94dvh;overflow-y:auto;
+           padding:0 0 env(safe-area-inset-bottom,16px);animation:sup .22s ease}
     @keyframes sup{from{transform:translateY(100%)}}
-    .handle{width:32px;height:4px;background:var(--bdr);border-radius:2px;margin:0 auto 14px}
-    .cbox h3{font-size:.96rem;font-weight:800;margin-bottom:4px}
-    .cbox .cn{font-size:.82rem;color:var(--muted);margin-bottom:16px}
-    .cbox .crow{display:flex;gap:8px}
-    @media(min-width:460px){
+    @media(min-width:500px){
       .overlay{align-items:center}
-      .cbox{border-radius:14px;padding:20px 18px 22px;max-width:380px;animation:cpop .18s ease}
+      .sheet{border-radius:14px;max-height:88dvh;animation:cpop .18s ease}
       @keyframes cpop{from{opacity:0;transform:scale(.95)}}
-      .handle{display:none}
     }
+    .handle{width:32px;height:4px;background:var(--bdr);border-radius:2px;margin:10px auto 0}
+    @media(min-width:500px){.handle{display:none}}
+    .sh-hdr{padding:12px 14px 10px;border-bottom:1px solid var(--bdr)}
+    .sh-hdr h3{font-size:.94rem;font-weight:800}
+    .sh-hdr .sn{font-size:.75rem;color:var(--muted);margin-top:2px}
+    .sh-body{padding:12px 14px}
+    .pre-info{background:#f8faff;border:1px solid #dbe8ff;border-radius:9px;
+              padding:9px 11px;margin-bottom:12px}
+    .pre-row{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 8px}
+    .pre-row .k{font-size:.6rem;color:var(--muted)} .pre-row .v{font-size:.76rem;font-weight:700}
+    .fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    @media(max-width:360px){.fgrid2{grid-template-columns:1fr}}
+    .ff{grid-column:1/-1}
+    .sh-ftr{padding:10px 14px;background:var(--bg);display:flex;gap:7px;justify-content:flex-end;
+            border-top:1px solid var(--bdr)}
+    /* Confirm sheet */
+    .cbox{background:var(--card);width:100%;max-width:380px;border-radius:18px 18px 0 0;
+          padding:18px 16px 28px;animation:sup .2s ease}
+    @media(min-width:420px){.cbox{border-radius:13px;padding:18px 16px 20px;animation:cpop .18s ease}}
+    .cbox h3{font-size:.94rem;font-weight:800;margin-bottom:4px}
+    .cbox .ci{font-size:.8rem;color:var(--muted);margin-bottom:16px;line-height:1.4}
+    .crow{display:flex;gap:8px}
     .estate{text-align:center;padding:36px 16px;color:var(--muted);font-size:.82rem}
     .tb{position:fixed;top:12px;right:12px;z-index:1000;display:flex;flex-direction:column;gap:6px;pointer-events:none}
     .toast{background:var(--card);border-radius:9px;padding:9px 13px;box-shadow:0 4px 20px rgba(0,0,0,.15);
@@ -141,6 +172,7 @@
     <div class="stat st"><div class="n" id="sT">0</div><div class="l">Total</div></div>
     <div class="stat sp"><div class="n" id="sP">0</div><div class="l">Pending</div></div>
     <div class="stat sv"><div class="n" id="sV">0</div><div class="l">Verified</div></div>
+    <div class="stat sa"><div class="n" id="sA">0</div><div class="l">Admitted</div></div>
   </div>
 
   <div id="stuW" class="hidden">
@@ -149,6 +181,7 @@
         <span class="pill pa on" data-f="all">All</span>
         <span class="pill pp" data-f="pending">Pending</span>
         <span class="pill pv" data-f="verified">Verified</span>
+        <span class="pill pm" data-f="admitted">Admitted</span>
       </div>
       <div class="srw">
         <span class="sri">S</span>
@@ -167,15 +200,76 @@
   </div>
 </main>
 
-<!-- Confirm Modal -->
-<div class="overlay" id="ov" onclick="bgc(event)">
+<!-- Verify Confirm -->
+<div class="overlay" id="ovV" onclick="bgcV(event)">
   <div class="cbox">
     <div class="handle"></div>
     <h3>Confirm Verification</h3>
-    <div class="cn" id="cInfo"></div>
+    <div class="ci" id="vInfo"></div>
     <div class="crow">
-      <button class="btn bsec bfull" onclick="close2()">Cancel</button>
-      <button class="btn bv bfull" id="cfmBtn" onclick="doVerify()">Yes, Verified</button>
+      <button class="btn bsec bfull" onclick="closeV()">Cancel</button>
+      <button class="btn bv bfull" id="cfmV" onclick="doVerify()">Yes, Verified</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admission Form -->
+<div class="overlay" id="ovA" onclick="bgcA(event)">
+  <div class="sheet" id="admSheet">
+    <div class="handle"></div>
+    <div class="sh-hdr">
+      <h3>Admission Form</h3>
+      <div class="sn" id="aNm"></div>
+    </div>
+    <div class="sh-body">
+      <!-- Pre-filled info -->
+      <div class="pre-info">
+        <div class="pre-row">
+          <div><div class="k">District</div><div class="v" id="aDist"></div></div>
+          <div><div class="k">Block</div><div class="v" id="aBlock"></div></div>
+          <div><div class="k">School</div><div class="v" id="aSchool" style="font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div></div>
+          <div><div class="k">Gender</div><div class="v" id="aGender"></div></div>
+          <div><div class="k">PEN</div><div class="v" id="aPen"></div></div>
+          <div><div class="k">Eligible Class</div><div class="v" id="aElig"></div></div>
+        </div>
+      </div>
+      <!-- Fields to fill -->
+      <div class="fgrid2">
+        <div>
+          <label class="lbl">Class *</label>
+          <select id="aC">
+            <option value="">-- Select --</option>
+            <option>1</option><option>2</option><option>3</option><option>4</option>
+            <option>5</option><option>6</option><option>7</option><option>8</option>
+            <option>9</option><option>10</option><option>11</option><option>12</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Stream</label>
+          <select id="aSt">
+            <option value="">-- NA --</option>
+            <option>Science</option><option>Commerce</option>
+            <option>Arts</option><option>Vocational</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Cycle *</label>
+          <select id="aCy">
+            <option value="">-- Select --</option>
+            <option value="I">Cycle I</option>
+            <option value="II">Cycle II</option>
+            <option value="Annual">Annual</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Admission Date</label>
+          <input type="date" id="aD">
+        </div>
+      </div>
+    </div>
+    <div class="sh-ftr">
+      <button class="btn bsec" onclick="closeA()">Cancel</button>
+      <button class="btn ba" id="admBtn" onclick="doAdmit()">Save Admission</button>
     </div>
   </div>
 </div>
@@ -185,7 +279,7 @@
 const API='https://script.google.com/macros/s/AKfycbxthPPTtfw0QjfqUszjWd2RAHk9uZ7Yd1BwC2Hg3k6WsvvZuRXZW4mpsDp6lYUozDeM/exec';
 const PS=30;
 let hier={districts:[],blocks:{},schools:{}};
-let allS=[],filt=[],pg=1,fm='all',srchT=null,cur=null;
+let allS=[],filt=[],pg=1,fm='all',srchT=null,curV=null,curA=null;
 
 async function api(p){
   const u=new URL(API);
@@ -228,6 +322,7 @@ async function load(){
     g('sT').textContent=r.total||0;
     g('sP').textContent=r.pending||0;
     g('sV').textContent=r.verified||0;
+    g('sA').textContent=r.admitted||0;
     hideSkel();filt=allS;pg=1;render();
     btn.disabled=false;btn.textContent='Refresh';
     toast('Loaded '+(r.total||0)+' students','tok');
@@ -253,24 +348,49 @@ function render(){
 }
 
 function card(s,idx){
-  const done=s.status==='Verified';
-  return '<div class="sc '+(done?'verified':'pending')+'">'
+  const sl=s.status.toLowerCase();
+  const badgeClass={pending:'bpend',verified:'bverif',admitted:'badmit'}[sl]||'bpend';
+
+  let infoBox='';
+  if(sl==='admitted'&&s.admInfo){
+    const a=s.admInfo;
+    infoBox='<div class="adm-info"><div class="atit">Admission Details</div>'
+      +'<div class="adm-grid">'
+      +ai('Class',a.admClass)+ai('Stream',a.stream)+ai('Cycle',a.cycle)
+      +ai('Date',a.admDate)+ai('On',a.timestamp)
+      +'</div></div>';
+  }else if(sl==='verified'&&s.verInfo){
+    infoBox='<div class="vdate vc">Verified on: '+h(s.verInfo.timestamp)+'</div>';
+  }
+
+  let btns='';
+  if(sl==='pending'){
+    btns='<button class="btn bv bsm" onclick="openV('+idx+')">Verify</button>';
+  }else if(sl==='verified'){
+    btns='<button class="btn bv bsm" onclick="openV('+idx+')">Re-verify</button>'
+        +'<button class="btn ba bsm" onclick="openA('+idx+')">Admit</button>';
+  }else if(sl==='admitted'){
+    btns='<button class="btn ba bsm" onclick="openA('+idx+')">Edit Admission</button>';
+  }
+
+  return '<div class="sc '+sl+'">'
     +'<div class="sc-top"><div>'
     +'<div class="sc-name">'+h(s.name||'--')+'</div>'
     +'<div class="sc-pen">PEN: '+h(s.pen||'--')+' &middot; '+h(s.gender||'--')+'</div>'
     +'</div>'
-    +'<span class="badge '+(done?'bverif':'bpend')+'">'+(done?'Verified':'Pending')+'</span>'
+    +'<span class="badge '+badgeClass+'">'+h(s.status)+'</span>'
     +'</div>'
     +'<div class="sc-info">'
     +si('Father',s.fatherName)+si('Mother',s.motherName)+si('Mobile',s.mobile)
     +'</div>'
-    +(done&&s.verInfo?'<div class="vdate">Verified on: '+h(s.verInfo.timestamp)+'</div>':'')
-    +(done?'':'<button class="btn bv bsm" onclick="confirm2('+idx+')">Verify</button>')
+    +infoBox
+    +'<div class="sc-btns">'+btns+'</div>'
     +'</div>';
 }
 const si=function(k,v){return '<div class="si"><div class="k">'+k+'</div><div class="v">'+h(v||'--')+'</div></div>'};
-function gp(d){pg+=d;render();scrollTo({top:0,behavior:'smooth'})}
+const ai=function(k,v){return v?'<div><div class="k">'+k+'</div><div class="v">'+h(v)+'</div></div>':''};
 
+function gp(d){pg+=d;render();scrollTo({top:0,behavior:'smooth'})}
 document.getElementById('pills').addEventListener('click',function(e){
   const p=e.target.closest('[data-f]');if(!p) return;
   fm=p.dataset.f;rPills();p.classList.add('on');pg=1;applyF();
@@ -287,36 +407,85 @@ function applyF(){
   render();
 }
 
-function confirm2(idx){
-  cur=filt[idx];if(!cur) return;
-  g('cInfo').textContent=cur.name+(cur.fatherName?' (Father: '+cur.fatherName+')':'')+' &mdash; Are you sure this student is verified?';
-  g('ov').classList.add('on');document.body.style.overflow='hidden';
+/* ---- Verify flow ---- */
+function openV(idx){
+  curV=filt[idx];if(!curV) return;
+  g('vInfo').textContent=curV.name+(curV.fatherName?' (Father: '+curV.fatherName+')':'')
+    +' -- Confirm this student is verified?';
+  g('ovV').classList.add('on');document.body.style.overflow='hidden';
 }
-function close2(){g('ov').classList.remove('on');document.body.style.overflow='';cur=null}
-function bgc(e){if(e.target===g('ov'))close2()}
-
+function closeV(){g('ovV').classList.remove('on');document.body.style.overflow='';curV=null}
+function bgcV(e){if(e.target===g('ovV'))closeV()}
 async function doVerify(){
-  if(!cur) return;
-  const btn=g('cfmBtn');
-  btn.disabled=true;btn.textContent='Saving...';
-  const data={
-    pen:cur.pen,studentName:cur.name,
-    district:cur.district,block:cur.block,lastSchool:cur.lastSchool
-  };
+  if(!curV) return;
+  const btn=g('cfmV');btn.disabled=true;btn.textContent='Saving...';
   try{
-    const r=await api({action:'save',data:JSON.stringify(data)});
+    const r=await api({action:'save',data:JSON.stringify({
+      pen:curV.pen,studentName:curV.name,district:curV.district,block:curV.block,lastSchool:curV.lastSchool
+    })});
     btn.disabled=false;btn.textContent='Yes, Verified';
     if(r.success){
-      cur.status='Verified';
-      cur.verInfo={timestamp:new Date().toLocaleString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})};
-      close2();applyF();
-      g('sV').textContent=allS.filter(function(s){return s.status==='Verified'}).length;
-      g('sP').textContent=allS.filter(function(s){return s.status==='Pending'}).length;
-      toast('Student verified!','tok');
+      curV.status='Verified';
+      curV.verInfo={timestamp:new Date().toLocaleString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})};
+      closeV();applyF();updS();toast('Student verified!','tok');
     }else toast(r.message,'terr');
   }catch(e){btn.disabled=false;btn.textContent='Yes, Verified';toast('Failed: '+e.message,'terr')}
 }
 
+/* ---- Admit flow ---- */
+function openA(idx){
+  curA=filt[idx];if(!curA) return;
+  g('aNm').textContent=curA.name||'';
+  g('aDist').textContent=curA.district||'--';
+  g('aBlock').textContent=curA.block||'--';
+  g('aSchool').textContent=curA.lastSchool||'--';
+  g('aGender').textContent=curA.gender||'--';
+  g('aPen').textContent=curA.pen||'--';
+  g('aElig').textContent='Cl.'+(curA.eligibleClass||curA.lastClass||'--');
+  // pre-fill from existing admission if any
+  const a=curA.admInfo||{};
+  sv('aC',a.admClass||curA.eligibleClass||'');
+  sv('aSt',a.stream||'');
+  sv('aCy',a.cycle||'');
+  sv('aD',a.admDate||tod());
+  g('ovA').classList.add('on');document.body.style.overflow='hidden';
+}
+function closeA(){g('ovA').classList.remove('on');document.body.style.overflow='';curA=null}
+function bgcA(e){if(e.target===g('ovA'))closeA()}
+async function doAdmit(){
+  if(!curA) return;
+  if(!g('aC').value){toast('Please select Class','terr');return}
+  if(!g('aCy').value){toast('Please select Cycle','terr');return}
+  const btn=g('admBtn');btn.disabled=true;btn.textContent='Saving...';
+  const data={
+    pen:curA.pen,studentName:curA.name,district:curA.district,
+    block:curA.block,lastSchool:curA.lastSchool,gender:curA.gender,
+    admClass:g('aC').value,stream:g('aSt').value,
+    cycle:g('aCy').value,admDate:g('aD').value
+  };
+  try{
+    const r=await api({action:'admit',data:JSON.stringify(data)});
+    btn.disabled=false;btn.textContent='Save Admission';
+    if(r.success){
+      const prev=curA.status;
+      curA.status='Admitted';
+      curA.admInfo={admClass:data.admClass,stream:data.stream,cycle:data.cycle,
+        admDate:data.admDate,timestamp:new Date().toLocaleString('en-IN',
+          {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})};
+      closeA();applyF();
+      if(prev!=='Admitted') g('sA').textContent=parseInt(g('sA').textContent||0)+1;
+      if(prev==='Verified')  g('sV').textContent=Math.max(0,parseInt(g('sV').textContent||0)-1);
+      toast('Admission saved!','tok');
+    }else toast(r.message,'terr');
+  }catch(e){btn.disabled=false;btn.textContent='Save Admission';toast('Failed: '+e.message,'terr')}
+}
+
+function updS(){
+  g('sT').textContent=allS.length;
+  g('sP').textContent=allS.filter(function(s){return s.status==='Pending'}).length;
+  g('sV').textContent=allS.filter(function(s){return s.status==='Verified'}).length;
+  g('sA').textContent=allS.filter(function(s){return s.status==='Admitted'}).length;
+}
 function showSkel(n){
   g('skel').innerHTML=Array(n).fill(0).map(function(){
     return '<div class="skc"><div class="skr"><div style="flex:1"><div class="ske skl" style="width:50%"></div>'
@@ -330,9 +499,12 @@ function hideSkel(){hide('skelW');g('skel').innerHTML=''}
 const g=function(id){return document.getElementById(id)};
 const show=function(id){g(id).classList.remove('hidden')};
 const hide=function(id){g(id).classList.add('hidden')};
+const sv=function(id,v){g(id).value=v};
 const opt=function(v){return '<option value="'+h(v)+'">'+h(v)+'</option>'};
 const rst=function(id,ph){var el=g(id);el.innerHTML='<option value="">'+ph+'</option>';el.disabled=true};
 const rPills=function(){document.querySelectorAll('.pill').forEach(function(p){p.classList.remove('on')})};
+const tod=function(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+const pad=function(n){return String(n).padStart(2,'0')};
 const h=function(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')};
 function toast(msg,t){
   var el=document.createElement('div');
