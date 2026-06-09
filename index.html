@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -205,7 +205,7 @@
 
 <header class="hdr">
   <h1>ðŸ“‹ Dropout Verification Portal</h1>
-  <p>Verification &amp; Admission Management â€” 2024-25</p>
+  <p>Verification & Admission Management â€” 2024-25</p>
 </header>
 
 <div class="tb" id="tb"></div>
@@ -589,7 +589,7 @@ const rst =(id,ph)=>{const el=g(id);el.innerHTML=`<option value="">${ph}</option
 const rPills=()=>document.querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));
 const tod=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
 const pad=n=>String(n).padStart(2,'0');
-const h=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const h=s=>String(s==null?'':s).replace(/&/g,'&').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 function toast(msg,t=''){
   const el=document.createElement('div');
   el.className='toast '+t;el.textContent=msg;g('tb').appendChild(el);
