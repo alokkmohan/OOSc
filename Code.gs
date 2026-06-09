@@ -17,7 +17,7 @@ function doGet(e) {
 
   // No action = serve the embedded HTML (direct Apps Script access)
   if (!action) {
-    return HtmlService.createHtmlOutputFromFile('Index')
+    return HtmlService.createHtmlOutputFromFile('index')
       .setTitle('Dropout Verification Portal')
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   }
