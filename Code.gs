@@ -4,7 +4,7 @@
 // ============================================================
 
 var SPREADSHEET_ID         = '11c6hAGriR8VGEIItBqx0sNrCCNqg0D1IrvHPN1xiv7A';
-var DATA_SHEET_NAME        = 'Dropout list';
+var DATA_SHEET_NAME        = 'Dropout list '; // trailing space — actual sheet name
 var VERIFICATIONS_SHEET    = 'Admission';
 
 // ─────────────────────────────────────────
@@ -25,7 +25,9 @@ function doGet(e) {
   // URL-based JSON API (called from GitHub Pages via fetch)
   try {
     var result;
-    if      (action === 'getHierarchy') result = getHierarchy();
+    if      (action === 'ping')         result = { ok:true, sheets: SpreadsheetApp.openById(SPREADSHEET_ID).getSheets().map(function(s){return s.getName()}) };
+    else if (action === 'clearCache')   { CacheService.getScriptCache().remove('hierarchy'); result = { ok:true, message:'Cache cleared' }; }
+    else if (action === 'getHierarchy') result = getHierarchy();
     else if (action === 'getDistricts') result = getDistricts();
     else if (action === 'getBlocks')    result = getBlocks(e.parameter.district);
     else if (action === 'getSchools')   result = getSchools(e.parameter.district, e.parameter.block);
@@ -80,7 +82,7 @@ function getHierarchy() {
     result.schools[k] = Object.keys(schools[k]).sort();
   });
 
-  cache.put('hierarchy', JSON.stringify(result), 21600); // 6 hours
+  try { cache.put('hierarchy', JSON.stringify(result), 21600); } catch(e) {} // ignore if too large
   return result;
 }
 
@@ -129,10 +131,11 @@ function getSchools(district, block) {
 
 // ─────────────────────────────────────────
 // API: Students for District + Block + School
+// col Q (index 16) = "Verified (Yes/No)" in source sheet
 // ─────────────────────────────────────────
 function getStudents(district, block, school) {
-  var rows   = _getDataRows();
-  var verMap = _getVerMap();
+  var rows;
+  try { rows = _getDataRows(); } catch(e) { throw new Error('_getDataRows failed: ' + e.message); }
 
   var students = [];
   rows.forEach(function(row) {
@@ -140,15 +143,13 @@ function getStudents(district, block, school) {
     if (_c(row[1]) !== block)    return;
     if (_c(row[4]) !== school)   return;
 
-    var pen = _c(row[5]);
-    var s = {
+    var pen      = _c(row[5]);
+    var verified = _c(String(row[16])).toLowerCase() === 'yes';
+    students.push({
       district:      _c(row[0]),
       block:         _c(row[1]),
-      udiseCode:     _c(row[2]),
-      schoolCat:     _c(row[3]),
       lastSchool:    _c(row[4]),
       pen:           pen,
-      stateCode:     _c(row[6]),
       name:          _c(row[7]),
       gender:        _c(row[8]),
       mobile:        _c(row[9]),
@@ -157,60 +158,56 @@ function getStudents(district, block, school) {
       subStatus:     _c(row[12]),
       lastClass:     _c(row[13]),
       eligibleClass: _c(row[14]),
-      academicYear:  _c(row[15]),
-      status:        'Pending',
-      verInfo:       null
-    };
-
-    if (pen && verMap[pen]) {
-      s.status  = verMap[pen].status;
-      s.verInfo = verMap[pen];
-    }
-    students.push(s);
+      status:        verified ? 'Verified' : 'Pending',
+      verInfo:       verified ? { timestamp: _c(String(row[17])) } : null
+    });
   });
 
   return {
     students: students,
     total:    students.length,
     verified: students.filter(function(s){ return s.status === 'Verified'; }).length,
-    admitted: students.filter(function(s){ return s.status === 'Admitted'; }).length,
     pending:  students.filter(function(s){ return s.status === 'Pending';  }).length
   };
 }
 
 // ─────────────────────────────────────────
-// API: Save Verification — marks student as Yes
+// API: Save Verification
+// Writes "Yes" to col Q (17) and timestamp to col R (18)
+// in the source "Dropout list " sheet, matched by PEN (col F = 6)
 // ─────────────────────────────────────────
 function saveVerification(data) {
   try {
-    var sheet   = _getOrCreateVerSheet();
-    var allData = sheet.getDataRange().getValues();
+    var ss    = _getSS();
+    var sheet = ss.getSheetByName(DATA_SHEET_NAME) || ss.getSheets()[0];
+    if (!sheet) throw new Error('Data sheet not found');
 
-    var existingRow = -1;
-    for (var i = 1; i < allData.length; i++) {
-      if (_c(String(allData[i][1])) === _c(String(data.pen))) {
-        existingRow = i + 1;
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 2) throw new Error('No data rows found');
+
+    var penCol   = 6;   // column F = PEN (1-based)
+    var verCol   = 17;  // column Q = Verified Yes/No (1-based)
+    var tsCol    = 18;  // column R = Timestamp (1-based)
+    var lastCol  = Math.max(sheet.getLastColumn(), tsCol);
+    var pens     = sheet.getRange(2, penCol, lastRow - 1, 1).getValues();
+
+    var targetRow = -1;
+    for (var i = 0; i < pens.length; i++) {
+      if (_c(String(pens[i][0])) === _c(String(data.pen))) {
+        targetRow = i + 2; // +2 because data starts at row 2
         break;
       }
     }
 
-    var row = [
-      new Date(),               // A  Timestamp
-      data.pen          || '',  // B  Student PEN
-      data.studentName  || '',  // C  Student Name
-      data.district     || '',  // D  District
-      data.block        || '',  // E  Block
-      data.lastSchool   || '',  // F  Last School
-      'Yes'                     // G  Verified
-    ];
+    if (targetRow === -1) throw new Error('PEN not found: ' + data.pen);
 
-    if (existingRow > 0) {
-      sheet.getRange(existingRow, 1, 1, row.length).setValues([row]);
-    } else {
-      sheet.appendRow(row);
-    }
+    var tz = Session.getScriptTimeZone();
+    var ts = Utilities.formatDate(new Date(), tz, 'dd/MM/yyyy HH:mm');
 
-    return { success: true, message: 'Student verified!' };
+    sheet.getRange(targetRow, verCol).setValue('Yes');
+    sheet.getRange(targetRow, tsCol).setValue(ts);
+
+    return { success: true, message: 'Student verified!', row: targetRow };
 
   } catch(err) {
     return { success: false, message: 'Error: ' + err.toString() };
@@ -232,10 +229,11 @@ function _getSS() {
 function _getDataRows() {
   var ss    = _getSS();
   var sheet = ss.getSheetByName(DATA_SHEET_NAME) || ss.getSheets()[0];
-  if (!sheet) throw new Error("Koi sheet nahi mili spreadsheet mein.");
+  if (!sheet) throw new Error("Sheet '" + DATA_SHEET_NAME + "' not found. Sheets available: " + ss.getSheets().map(function(s){return s.getName()}).join(', '));
   var lastRow = sheet.getLastRow();
-  if (lastRow < 2) return [];
-  var cols = Math.max(sheet.getLastColumn(), 16);
+  var lastCol = sheet.getLastColumn();
+  if (lastRow < 2 || lastCol < 1) return [];
+  var cols = Math.max(lastCol, 18); // read at least 18 cols (col Q=verified, col R=timestamp)
   return sheet.getRange(2, 1, lastRow - 1, cols).getValues();
 }
 
