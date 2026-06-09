@@ -68,34 +68,27 @@
     .pm{background:#dcfce7;color:#14532d}  .pm.on{background:var(--ok);color:#fff}
     .srw{position:relative}
     .srw input{padding-left:33px}
-    .sri{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+    .sri{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:.83rem}
     .slist{display:flex;flex-direction:column;gap:7px}
-    .sc{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:12px;
-        border-left:3px solid var(--bdr)}
+    .sc{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:12px;border-left:3px solid var(--bdr)}
     @media(hover:hover){.sc:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(0,0,0,.1)}}
-    .sc.pending{border-left-color:var(--warn)} .sc.verified{border-left-color:var(--info)}
-    .sc.admitted{border-left-color:var(--ok)}
+    .sc.pending{border-left-color:var(--warn)} .sc.verified{border-left-color:var(--info)} .sc.admitted{border-left-color:var(--ok)}
     .stop{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:7px}
     .sname{font-weight:800;font-size:.92rem}
     .ssub{font-size:.69rem;color:var(--muted);margin-top:2px}
     .sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 7px;margin-bottom:9px}
     @media(max-width:380px){.sgrid{grid-template-columns:repeat(2,1fr)}}
     .sk .k{font-size:.62rem;color:var(--muted)} .sk .v{font-size:.75rem;font-weight:700}
-    .vib{background:#f8faff;border:1px solid #dbe8ff;border-radius:8px;padding:8px 10px;
-         margin-bottom:8px;font-size:.72rem}
+    .vib{background:#f8faff;border:1px solid #dbe8ff;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:.72rem}
     .vit{font-weight:800;color:var(--pri);margin-bottom:4px;font-size:.72rem}
     .vig{display:grid;grid-template-columns:repeat(3,1fr);gap:3px 7px}
-    .ske{animation:shim 1.3s infinite;
-         background:linear-gradient(90deg,#f0f0f0 25%,#e4e4e4 50%,#f0f0f0 75%);
-         background-size:200% 100%;border-radius:6px}
+    .ske{animation:shim 1.3s infinite;background:linear-gradient(90deg,#f0f0f0 25%,#e4e4e4 50%,#f0f0f0 75%);background-size:200% 100%;border-radius:6px}
     @keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
     .skc{background:var(--card);border-radius:var(--r);padding:12px;box-shadow:var(--sh)}
     .skr{display:flex;justify-content:space-between;gap:8px;margin-bottom:9px}
-    .skl{height:12px;margin-bottom:4px}
-    .skbg{width:56px;height:20px;flex-shrink:0;border-radius:10px}
+    .skl{height:12px;margin-bottom:4px} .skbg{width:56px;height:20px;flex-shrink:0;border-radius:10px}
     .skg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:9px}
-    .skce{height:28px}
-    .skbt{width:86px;height:28px;border-radius:7px}
+    .skce{height:28px} .skbt{width:86px;height:28px;border-radius:7px}
     .pager{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 0 3px;flex-wrap:wrap}
     .pgi{font-size:.77rem;color:var(--muted);font-weight:600}
     .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:500;
@@ -106,12 +99,10 @@
            margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden}
     @media(max-width:580px){
       .overlay{align-items:flex-end;padding:0}
-      .sheet{border-radius:20px 20px 0 0;max-height:92dvh;overflow-y:auto;
-             margin:0;max-width:100%;padding-bottom:env(safe-area-inset-bottom,10px);
-             animation:sup .22s cubic-bezier(.25,.46,.45,.94)}
+      .sheet{border-radius:20px 20px 0 0;max-height:92dvh;overflow-y:auto;margin:0;max-width:100%;
+             padding-bottom:env(safe-area-inset-bottom,10px);animation:sup .22s cubic-bezier(.25,.46,.45,.94)}
       @keyframes sup{from{transform:translateY(100%)}}
-      .handle{display:block;width:34px;height:4px;background:var(--bdr);
-              border-radius:2px;margin:10px auto 6px}
+      .handle{display:block;width:34px;height:4px;background:var(--bdr);border-radius:2px;margin:10px auto 6px}
     }
     @media(min-width:581px){
       .sheet{animation:pop .18s ease}
@@ -121,14 +112,11 @@
     .shdr{background:linear-gradient(135deg,#4361ee,#3a0ca3);color:#fff;padding:13px 14px;
           display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
     .shdr h3{font-size:.92rem;font-weight:800}
-    .shdr .sub{font-size:.7rem;opacity:.82;margin-top:2px;
-               max-width:calc(100% - 34px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .shdr .sub{font-size:.7rem;opacity:.82;margin-top:2px;max-width:calc(100% - 34px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .cbtn{background:rgba(255,255,255,.2);border:none;color:#fff;width:26px;height:26px;
-          border-radius:50%;font-size:.87rem;cursor:pointer;flex-shrink:0;
-          display:flex;align-items:center;justify-content:center}
+          border-radius:50%;font-size:.87rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
     .sbody{padding:13px}
-    .snap{background:linear-gradient(135deg,#f0f4ff,#e8f0ff);border:1px solid #c7d7ff;
-          border-radius:9px;padding:10px 12px;margin-bottom:12px}
+    .snap{background:linear-gradient(135deg,#f0f4ff,#e8f0ff);border:1px solid #c7d7ff;border-radius:9px;padding:10px 12px;margin-bottom:12px}
     .sna{font-weight:800;color:var(--pri);font-size:.92rem}
     .snb{font-size:.7rem;color:var(--muted);margin-top:3px;display:flex;flex-wrap:wrap;gap:7px}
     .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -136,20 +124,19 @@
     .ff{grid-column:1/-1}
     .sftr{padding:11px 13px;background:var(--bg);display:flex;gap:7px;justify-content:flex-end}
     .sechdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px;margin-bottom:9px}
-    .sect{font-size:.86rem;font-weight:800}
-    .secc{font-size:.71rem;color:var(--muted)}
+    .sect{font-size:.86rem;font-weight:800} .secc{font-size:.71rem;color:var(--muted)}
     .estate{text-align:center;padding:36px 20px;color:var(--muted)}
-    .eico{font-size:2rem;margin-bottom:7px}
     .estate p{font-size:.82rem}
-    .tb{position:fixed;top:12px;right:12px;z-index:1000;
-        display:flex;flex-direction:column;gap:6px;pointer-events:none}
-    .toast{background:var(--card);border-radius:9px;padding:10px 13px;
-           box-shadow:0 4px 20px rgba(0,0,0,.15);font-size:.8rem;max-width:270px;
-           border-left:3px solid var(--pri);animation:tin .22s ease;pointer-events:all;color:var(--txt)}
+    .ldg{text-align:center;padding:24px;color:var(--muted);font-size:.82rem}
+    .spinner{width:28px;height:28px;border:3px solid var(--bdr);border-top-color:var(--pri);
+             border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .tb{position:fixed;top:12px;right:12px;z-index:1000;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+    .toast{background:var(--card);border-radius:9px;padding:10px 13px;box-shadow:0 4px 20px rgba(0,0,0,.15);
+           font-size:.8rem;max-width:270px;border-left:3px solid var(--pri);animation:tin .22s ease;pointer-events:all;color:var(--txt)}
     .tok{border-left-color:var(--ok)} .terr{border-left-color:var(--err)}
     @keyframes tin{from{transform:translateX(110%);opacity:0}}
-    .hidden{display:none!important}
-    .mb9{margin-bottom:9px} .mt4{margin-top:4px}
+    .hidden{display:none!important} .mb9{margin-bottom:9px} .mt4{margin-top:4px}
   </style>
 </head>
 <body>
@@ -163,7 +150,7 @@
     <div class="fg">
       <div>
         <label class="lbl">District</label>
-        <select id="selD" onchange="onDist()"><option value="">Loading...</option></select>
+        <select id="selD" onchange="onDist()" disabled><option value="">Loading...</option></select>
       </div>
       <div>
         <label class="lbl">Block</label>
@@ -206,9 +193,7 @@
       <span class="pgi" id="pgi"></span>
       <button class="btn bsec bsm" id="bNext" onclick="gp(1)">Next &rarr;</button>
     </div>
-    <div class="estate hidden" id="emptyS">
-      <div class="eico">[ ]</div><p>No students found</p>
-    </div>
+    <div class="estate hidden" id="emptyS"><p>No students found</p></div>
   </div>
 </main>
 <div class="overlay" id="ov" onclick="bgc(event)">
@@ -293,7 +278,9 @@
 'use strict';
 const API='https://script.google.com/macros/s/AKfycbxthPPTtfw0QjfqUszjWd2RAHk9uZ7Yd1BwC2Hg3k6WsvvZuRXZW4mpsDp6lYUozDeM/exec';
 const PS=30;
-let allS=[],filt=[],pg=1,fm='all',st=null,cur=null;
+let hier={districts:[],blocks:{},schools:{}};
+let allS=[],filt=[],pg=1,fm='all',srchT=null,cur=null;
+
 async function api(p){
   const u=new URL(API);
   for(const[k,v] of Object.entries(p)) u.searchParams.set(k,String(v));
@@ -303,32 +290,27 @@ async function api(p){
   if(j&&j.error) throw new Error(j.error);
   return j;
 }
-async function onDist(){
+
+// Instant client-side dropdowns - no extra API call
+function onDist(){
   const d=g('selD').value;
   rst('selB','-- Select Block --');rst('selS','-- Select School --');
   g('btnL').disabled=true;
   if(!d) return;
-  g('selB').innerHTML='<option>Loading...</option>';
-  try{
-    const l=await api({action:'getBlocks',district:d});
-    rst('selB','-- Select Block --');
-    l.forEach(v=>g('selB').innerHTML+=opt(v));
-    g('selB').disabled=false;
-  }catch(e){toast('Failed to load blocks','terr')}
+  const blist=hier.blocks[d]||[];
+  blist.forEach(function(v){g('selB').innerHTML+=opt(v)});
+  g('selB').disabled=false;
 }
-async function onBlock(){
+function onBlock(){
   const d=g('selD').value,b=g('selB').value;
   rst('selS','-- Select School --');g('btnL').disabled=true;
   if(!b) return;
-  g('selS').innerHTML='<option>Loading...</option>';
-  try{
-    const l=await api({action:'getSchools',district:d,block:b});
-    rst('selS','-- Select School --');
-    l.forEach(v=>g('selS').innerHTML+=opt(v));
-    g('selS').disabled=false;
-  }catch(e){toast('Failed to load schools','terr')}
+  const slist=hier.schools[d+'||'+b]||[];
+  slist.forEach(function(v){g('selS').innerHTML+=opt(v)});
+  g('selS').disabled=false;
 }
 function onSchool(){g('btnL').disabled=!g('selS').value}
+
 async function load(){
   const d=g('selD').value,b=g('selB').value,s=g('selS').value;
   if(!d||!b||!s){toast('Select district, block and school','terr');return}
@@ -350,6 +332,7 @@ async function load(){
     toast('Load failed: '+e.message,'terr');
   }
 }
+
 function render(){
   const tot=filt.length,pages=Math.max(1,Math.ceil(tot/PS));
   pg=Math.min(pg,pages);
@@ -357,7 +340,7 @@ function render(){
   g('sCnt').textContent=tot+' students';
   if(!tot){g('sList').innerHTML='';show('emptyS');hide('pager');return}
   hide('emptyS');
-  g('sList').innerHTML=filt.slice(s,e2).map((st,i)=>card(st,s+i)).join('');
+  g('sList').innerHTML=filt.slice(s,e2).map(function(st,i){return card(st,s+i)}).join('');
   if(tot>PS){
     show('pager');
     g('pgi').textContent='Page '+pg+' / '+pages;
@@ -373,8 +356,7 @@ function card(s,idx){
     vi='<div class="vib"><div class="vit">Verification <small style="font-weight:400;color:#888">'+h(v.timestamp)+'</small></div>'
       +'<div class="vig">'+vc('Class',v.verifiedClass)+vc('Stream',v.stream)+vc('Cycle',v.cycle)
       +vc('Roll',v.rollNo)+vc('Fee',v.fee?'Rs.'+v.fee:'')+vc('Date',v.admissionDate)+vc('By',v.verifiedBy)+'</div>'
-      +(v.remarks?'<div style="margin-top:4px;color:#555;font-size:.69rem">Note: '+h(v.remarks)+'</div>':'')
-      +'</div>';
+      +(v.remarks?'<div style="margin-top:4px;color:#555;font-size:.69rem">Note: '+h(v.remarks)+'</div>':'')+'</div>';
   }
   const bc=sl==='pending'?'bp':'bw';
   const bt=sl==='pending'?'Verify':'Update';
@@ -386,14 +368,14 @@ function card(s,idx){
     +sf('Prev Cl','Cl.'+(s.lastClass||'--'))+sf('Eligible','Cl.'+(s.eligibleClass||'--'))+sf('Status',s.subStatus)+'</div>'
     +vi+'<button class="btn '+bc+' bsm" onclick="openM('+idx+')">'+bt+'</button></div>';
 }
-const sf=(k,v)=>'<div class="sk"><div class="k">'+k+'</div><div class="v">'+h(v||'--')+'</div></div>';
-const vc=(k,v)=>v?'<div><div class="k">'+k+'</div><div class="v">'+h(v)+'</div></div>':'';
+const sf=function(k,v){return '<div class="sk"><div class="k">'+k+'</div><div class="v">'+h(v||'--')+'</div></div>'};
+const vc=function(k,v){return v?'<div><div class="k">'+k+'</div><div class="v">'+h(v)+'</div></div>':''};
 function gp(d){pg+=d;render();scrollTo({top:0,behavior:'smooth'})}
 document.getElementById('pills').addEventListener('click',function(e){
   const p=e.target.closest('[data-f]');if(!p) return;
   fm=p.dataset.f;rPills();p.classList.add('on');pg=1;applyF();
 });
-function onSrch(){clearTimeout(st);st=setTimeout(function(){pg=1;applyF()},260)}
+function onSrch(){clearTimeout(srchT);srchT=setTimeout(function(){pg=1;applyF()},260)}
 function applyF(){
   const q=g('srch').value.toLowerCase().trim();
   filt=allS.filter(function(s){
@@ -433,8 +415,7 @@ async function save(){
   const btn=g('saveBtn');
   btn.disabled=true;btn.textContent='Saving...';
   const data={
-    pen:cur.pen,studentName:cur.name,district:cur.district,
-    block:cur.block,lastSchool:cur.lastSchool,
+    pen:cur.pen,studentName:cur.name,district:cur.district,block:cur.block,lastSchool:cur.lastSchool,
     verifiedClass:g('fC').value,stream:g('fSt').value,cycle:g('fCy').value,
     admissionDate:g('fD').value,rollNo:g('fR').value.trim(),fee:g('fF').value,
     remarks:g('fRe').value.trim(),verifiedBy:g('fB').value.trim(),status:g('fSs').value
@@ -486,13 +467,20 @@ function toast(msg,t){
   setTimeout(function(){el.style.transition='opacity .26s';el.style.opacity='0';
     setTimeout(function(){if(el.parentNode)el.remove()},260)},3500);
 }
+// Load hierarchy once on page start
 (async function(){
   try{
-    const l=await api({action:'getDistricts'});
+    const data=await api({action:'getHierarchy'});
+    hier=data;
     const s=g('selD');
     s.innerHTML='<option value="">-- Select District --</option>';
-    l.forEach(function(d){s.innerHTML+=opt(d)});
-  }catch(e){g('selD').innerHTML='<option value="">Error loading</option>';toast('Districts failed: '+e.message,'terr')}
+    hier.districts.forEach(function(d){s.innerHTML+=opt(d)});
+    s.disabled=false;
+  }catch(e){
+    g('selD').innerHTML='<option value="">Error - Retry</option>';
+    g('selD').disabled=false;
+    toast('Failed to load: '+e.message,'terr');
+  }
 })();
 </script>
 </body>

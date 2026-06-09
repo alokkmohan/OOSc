@@ -25,7 +25,8 @@ function doGet(e) {
   // URL-based JSON API (called from GitHub Pages via fetch)
   try {
     var result;
-    if      (action === 'getDistricts') result = getDistricts();
+    if      (action === 'getHierarchy') result = getHierarchy();
+    else if (action === 'getDistricts') result = getDistricts();
     else if (action === 'getBlocks')    result = getBlocks(e.parameter.district);
     else if (action === 'getSchools')   result = getSchools(e.parameter.district, e.parameter.block);
     else if (action === 'getStudents')  result = getStudents(e.parameter.district, e.parameter.block, e.parameter.school);
@@ -38,6 +39,49 @@ function doGet(e) {
     return ContentService.createTextOutput(JSON.stringify({ error: err.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+// ─────────────────────────────────────────
+// API: Full hierarchy in ONE call (cached 6h)
+// Returns { districts:[], blocks:{d:[...]}, schools:{d_b:[...]} }
+// ─────────────────────────────────────────
+function getHierarchy() {
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get('hierarchy');
+  if (cached) return JSON.parse(cached);
+
+  var rows = _getDataRows();
+  var districts = {}, blocks = {}, schools = {};
+
+  rows.forEach(function(row) {
+    var d = _c(row[0]), b = _c(row[1]), s = _c(row[4]);
+    if (!d) return;
+    districts[d] = true;
+    if (b) {
+      if (!blocks[d]) blocks[d] = {};
+      blocks[d][b] = true;
+    }
+    if (b && s) {
+      var key = d + '||' + b;
+      if (!schools[key]) schools[key] = {};
+      schools[key][s] = true;
+    }
+  });
+
+  var result = {
+    districts: Object.keys(districts).sort(),
+    blocks: {},
+    schools: {}
+  };
+  Object.keys(blocks).forEach(function(d) {
+    result.blocks[d] = Object.keys(blocks[d]).sort();
+  });
+  Object.keys(schools).forEach(function(k) {
+    result.schools[k] = Object.keys(schools[k]).sort();
+  });
+
+  cache.put('hierarchy', JSON.stringify(result), 21600); // 6 hours
+  return result;
 }
 
 // ─────────────────────────────────────────
