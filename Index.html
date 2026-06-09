@@ -1,256 +1,335 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#4361ee">
+  <meta name="description" content="Dropout Student Verification & Admission Management 2024-25">
   <title>Dropout Verification Portal</title>
   <style>
-    :root {
-      --pri:    #4361ee; --pri-dk: #3451d1;
-      --ok:     #2dc653; --warn:   #f8961e;
-      --danger: #f72585; --info:   #4cc9f0;
-      --text:   #212529; --muted:  #6c757d;
-      --bg:     #eef0f5; --white:  #ffffff; --border: #dee2e6;
-      --shadow: 0 2px 10px rgba(0,0,0,.09);
-      --r: 12px; --ease: all .22s ease;
+    :root{
+      --pri:#4361ee;--ok:#2dc653;--warn:#f8961e;--err:#f72585;--info:#4cc9f0;
+      --bg:#f0f2f7;--card:#fff;--bdr:#e2e8f0;--txt:#1e293b;--muted:#64748b;
+      --r:13px;--sh:0 1px 3px rgba(0,0,0,.07),0 3px 10px rgba(0,0,0,.05);
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    @media(prefers-color-scheme:dark){
+      :root{--bg:#0f172a;--card:#1e293b;--bdr:#334155;--txt:#f1f5f9;--muted:#94a3b8}
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{-webkit-text-size-adjust:100%}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+         background:var(--bg);color:var(--txt);min-height:100dvh;-webkit-font-smoothing:antialiased}
 
     /* Header */
-    .hdr { background: linear-gradient(135deg,#4361ee,#3a0ca3); color:#fff; padding:16px; text-align:center; position:sticky; top:0; z-index:100; box-shadow:0 3px 12px rgba(67,97,238,.35); }
-    .hdr h1 { font-size:1.25rem; font-weight:800; }
-    .hdr p  { font-size:.76rem; opacity:.82; margin-top:3px; }
+    .hdr{background:linear-gradient(135deg,#4361ee,#3a0ca3);color:#fff;padding:13px 16px;
+         text-align:center;position:sticky;top:0;z-index:200;box-shadow:0 2px 14px rgba(67,97,238,.4)}
+    .hdr h1{font-size:1.08rem;font-weight:800;letter-spacing:-.01em}
+    .hdr p{font-size:.69rem;opacity:.78;margin-top:2px}
 
-    .wrap { max-width:860px; margin:0 auto; padding:14px; }
+    /* Layout */
+    .page{max-width:800px;margin:0 auto;padding:10px 10px 60px}
 
-    /* Cards */
-    .card { background:var(--white); border-radius:var(--r); box-shadow:var(--shadow); padding:16px; margin-bottom:13px; }
-    .clbl { font-size:.7rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-bottom:11px; }
+    /* Card */
+    .card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:13px;margin-bottom:9px}
 
-    /* Form */
-    .fg3 { display:grid; grid-template-columns:repeat(3,1fr); gap:11px; margin-bottom:11px; }
-    @media(max-width:600px){ .fg3 { grid-template-columns:1fr; } }
-    .fg2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-    @media(max-width:440px){ .fg2 { grid-template-columns:1fr; } }
-    .full { grid-column:1/-1; }
-
-    label.lbl { display:block; font-size:.71rem; font-weight:700; color:var(--muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:.3px; }
-    select, input[type=text], input[type=date], input[type=number], textarea {
-      width:100%; padding:9px 11px; border:1.5px solid var(--border); border-radius:8px;
-      font-size:.87rem; color:var(--text); background:#fff; transition:var(--ease);
+    /* Form elements */
+    .lbl{display:block;font-size:.66rem;font-weight:700;color:var(--muted);
+         text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+    select,input,textarea{
+      display:block;width:100%;padding:9px 11px;background:var(--card);
+      border:1.5px solid var(--bdr);border-radius:8px;font-size:.87rem;color:var(--txt);
+      -webkit-appearance:none;appearance:none;transition:border-color .13s,box-shadow .13s
     }
-    select { appearance:none; -webkit-appearance:none;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-      background-repeat:no-repeat; background-position:right 10px center; padding-right:30px; }
-    select:disabled { background-color:#f4f5f7; color:#adb5bd; }
-    select:focus, input:focus, textarea:focus { outline:none; border-color:var(--pri); box-shadow:0 0 0 3px rgba(67,97,238,.14); }
+    select{padding-right:27px;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right 9px center}
+    select:disabled{opacity:.5}
+    select:focus,input:focus,textarea:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 3px rgba(67,97,238,.14)}
 
     /* Buttons */
-    .btn { display:inline-flex; align-items:center; justify-content:center; gap:5px; padding:9px 17px; border:none; border-radius:8px; font-size:.87rem; font-weight:700; cursor:pointer; transition:var(--ease); white-space:nowrap; }
-    .btn:disabled { opacity:.5; cursor:not-allowed; }
-    .bp { background:var(--pri);    color:#fff; } .bp:hover:not(:disabled){ background:var(--pri-dk); transform:translateY(-1px); }
-    .bo { background:var(--ok);     color:#fff; } .bo:hover:not(:disabled){ background:#26b04a; }
-    .bw { background:var(--warn);   color:#fff; } .bw:hover:not(:disabled){ background:#e07b0d; }
-    .bs { background:#6c757d;       color:#fff; } .bs:hover:not(:disabled){ background:#565e64; }
-    .bsm { padding:6px 12px; font-size:.79rem; }
-    .bfull { width:100%; }
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;
+         padding:10px 17px;border:none;border-radius:9px;font-size:.86rem;font-weight:700;
+         cursor:pointer;transition:transform .12s,opacity .12s;
+         -webkit-tap-highlight-color:transparent;touch-action:manipulation}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .btn:active:not(:disabled){transform:scale(.97)}
+    .bp{background:var(--pri);color:#fff} .bo{background:var(--ok);color:#fff}
+    .bw{background:var(--warn);color:#fff} .bsec{background:var(--bdr);color:var(--txt)}
+    .bsm{padding:6px 12px;font-size:.78rem;border-radius:7px}
+    .bfull{width:100%}
+
+    /* Filter grid */
+    .fg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:9px}
+    @media(max-width:520px){.fg{grid-template-columns:1fr;gap:7px}}
 
     /* Stats */
-    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin-bottom:13px; }
-    @media(max-width:560px){ .stats { grid-template-columns:repeat(2,1fr); } }
-    .stat { background:var(--white); border-radius:var(--r); padding:13px 8px; text-align:center; box-shadow:var(--shadow); }
-    .stat .n { font-size:1.9rem; font-weight:900; line-height:1; }
-    .stat .t { font-size:.68rem; color:var(--muted); margin-top:3px; font-weight:600; }
-    .st .n { color:var(--pri); } .sp .n { color:var(--warn); } .sv .n { color:var(--info); } .sa .n { color:var(--ok); }
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+    @media(max-width:420px){.stats{grid-template-columns:repeat(2,1fr)}}
+    .stat{background:var(--card);border-radius:var(--r);padding:11px 6px;text-align:center;box-shadow:var(--sh)}
+    .stat .n{font-size:1.65rem;font-weight:900;line-height:1}
+    .stat .l{font-size:.62rem;color:var(--muted);margin-top:2px;font-weight:700;
+             text-transform:uppercase;letter-spacing:.3px}
+    .st .n{color:var(--pri)} .sp .n{color:var(--warn)} .sv .n{color:var(--info)} .sa .n{color:var(--ok)}
 
     /* Badges */
-    .badge { display:inline-block; padding:3px 9px; border-radius:20px; font-size:.67rem; font-weight:800; text-transform:uppercase; letter-spacing:.4px; white-space:nowrap; }
-    .bp2 { background:#fff3cd; color:#7d5a00; }
-    .bv2 { background:#cff4fc; color:#0c5460; }
-    .ba2 { background:#d1e7dd; color:#0f5132; }
+    .badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:.63rem;
+           font-weight:800;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;flex-shrink:0}
+    .bpen{background:#fff3cd;color:#92400e} .bver{background:#cff4fc;color:#0c4a6e}
+    .badm{background:#dcfce7;color:#14532d}
 
-    /* Pills */
-    .pills { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
-    .pill { padding:4px 12px; border-radius:20px; font-size:.73rem; font-weight:700; cursor:pointer; border:2px solid transparent; transition:var(--ease); user-select:none; }
-    .pall { background:#e9ecef; color:var(--text); } .pall.act { background:var(--pri); color:#fff; border-color:var(--pri); }
-    .ppen { background:#fff3cd; color:#7d5a00; }   .ppen.act { background:var(--warn); color:#fff; border-color:var(--warn); }
-    .pver { background:#cff4fc; color:#0c5460; }   .pver.act { background:var(--info); color:#fff; border-color:var(--info); }
-    .padm { background:#d1e7dd; color:#0f5132; }   .padm.act { background:var(--ok);   color:#fff; border-color:var(--ok); }
-
-    /* Student cards */
-    .slist { display:flex; flex-direction:column; gap:10px; }
-    .sc { background:var(--white); border-radius:var(--r); box-shadow:var(--shadow); padding:14px; border-left:4px solid var(--border); transition:var(--ease); }
-    .sc:hover { transform:translateY(-1px); box-shadow:0 5px 18px rgba(0,0,0,.11); }
-    .scpending  { border-left-color:var(--warn); }
-    .scverified { border-left-color:var(--info); }
-    .scadmitted { border-left-color:var(--ok);   }
-    .stop { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:9px; }
-    .sname { font-size:.97rem; font-weight:800; }
-    .smeta { font-size:.73rem; color:var(--muted); margin-top:2px; }
-    .sdets { display:grid; grid-template-columns:repeat(3,1fr); gap:6px 10px; font-size:.78rem; margin-bottom:10px; }
-    @media(max-width:480px){ .sdets { grid-template-columns:repeat(2,1fr); } }
-    .dl { color:var(--muted); font-size:.67rem; margin-bottom:1px; } .dv { font-weight:700; }
-
-    /* Ver-info box */
-    .vbox { background:#f6f8ff; border:1px solid #d0daff; border-radius:8px; padding:10px 12px; font-size:.77rem; margin-bottom:10px; }
-    .vtitle { font-weight:800; color:var(--pri); margin-bottom:6px; }
-    .vgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; }
-    @media(max-width:480px){ .vgrid { grid-template-columns:repeat(2,1fr); } }
-    .vnote { margin-top:5px; color:#444; }
+    /* Filter pills */
+    .pills{display:flex;gap:5px;flex-wrap:wrap}
+    .pill{padding:5px 12px;border-radius:20px;font-size:.71rem;font-weight:700;
+          cursor:pointer;border:2px solid transparent;transition:all .12s;
+          -webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
+    .pa{background:#e2e8f0;color:var(--txt)}  .pa.on{background:var(--pri);color:#fff}
+    .pp{background:#fff3cd;color:#92400e}     .pp.on{background:var(--warn);color:#fff}
+    .pv{background:#cff4fc;color:#0c4a6e}     .pv.on{background:var(--info);color:#fff}
+    .pm{background:#dcfce7;color:#14532d}     .pm.on{background:var(--ok);color:#fff}
 
     /* Search */
-    .swrap { position:relative; margin-bottom:11px; }
-    .swrap input { padding-left:34px; }
-    .sico { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--muted); pointer-events:none; font-size:.88rem; }
+    .srw{position:relative}
+    .srw input{padding-left:33px}
+    .sri{position:absolute;left:10px;top:50%;transform:translateY(-50%);
+         color:var(--muted);pointer-events:none;font-size:.83rem}
 
-    /* Results header */
-    .rhdr { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:11px; }
-    .rtitle { font-size:.9rem; font-weight:800; } .rcnt { font-size:.76rem; color:var(--muted); }
+    /* Student list */
+    .slist{display:flex;flex-direction:column;gap:7px;contain:layout}
+    .sc{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:12px;
+        border-left:3px solid var(--bdr);contain:layout style;will-change:transform}
+    @media(hover:hover){.sc:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(0,0,0,.1)}}
+    .sc.pending{border-left-color:var(--warn)} .sc.verified{border-left-color:var(--info)}
+    .sc.admitted{border-left-color:var(--ok)}
+    .stop{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:7px}
+    .sname{font-weight:800;font-size:.92rem}
+    .ssub{font-size:.69rem;color:var(--muted);margin-top:2px}
+    .sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 7px;margin-bottom:9px}
+    @media(max-width:380px){.sgrid{grid-template-columns:repeat(2,1fr)}}
+    .sk .k{font-size:.62rem;color:var(--muted)} .sk .v{font-size:.75rem;font-weight:700}
 
-    /* Spinner / Empty */
-    .spwrap { display:flex; flex-direction:column; align-items:center; gap:12px; padding:46px 20px; }
-    .spinner { width:34px; height:34px; border:3px solid #ddd; border-top-color:var(--pri); border-radius:50%; animation:spin .75s linear infinite; }
-    @keyframes spin { to { transform:rotate(360deg); } }
-    .empty { text-align:center; padding:46px 20px; color:var(--muted); }
-    .eico { font-size:2.6rem; margin-bottom:9px; }
+    /* Verification info box */
+    .vib{background:#f8faff;border:1px solid #dbe8ff;border-radius:8px;padding:8px 10px;
+         margin-bottom:8px;font-size:.72rem}
+    .vit{font-weight:800;color:var(--pri);margin-bottom:4px;font-size:.72rem}
+    .vig{display:grid;grid-template-columns:repeat(3,1fr);gap:3px 7px}
+    @media(max-width:380px){.vig{grid-template-columns:repeat(2,1fr)}}
 
-    /* Modal */
-    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.52); z-index:500; overflow-y:auto; padding:18px 13px; align-items:flex-start; justify-content:center; }
-    .overlay.on { display:flex; }
-    .modal { background:#fff; border-radius:var(--r); width:100%; max-width:530px; margin:auto; box-shadow:0 24px 64px rgba(0,0,0,.28); overflow:hidden; }
-    .mhdr { background:linear-gradient(135deg,#4361ee,#3a0ca3); color:#fff; padding:15px 17px; display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
-    .mhdr h3 { font-size:.96rem; font-weight:800; }
-    .msub { font-size:.74rem; opacity:.82; margin-top:2px; max-width:90%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .mcls { background:rgba(255,255,255,.22); border:none; color:#fff; width:27px; height:27px; border-radius:50%; font-size:.95rem; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
-    .mbody { padding:16px; }
-    .mstu { background:linear-gradient(135deg,#f0f4ff,#e8f4ff); border:1px solid #c7d7ff; border-radius:8px; padding:11px; margin-bottom:15px; }
-    .msname { font-weight:800; color:var(--pri); font-size:.96rem; }
-    .msmeta { font-size:.74rem; color:var(--muted); margin-top:3px; display:flex; flex-wrap:wrap; gap:9px; }
-    .mftr { padding:13px 16px; background:#f8f9fa; display:flex; gap:9px; justify-content:flex-end; flex-wrap:wrap; }
+    /* Skeleton shimmer */
+    .ske{animation:shim 1.3s infinite;
+         background:linear-gradient(90deg,#f0f0f0 25%,#e4e4e4 50%,#f0f0f0 75%);
+         background-size:200% 100%;border-radius:6px}
+    @keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .skc{background:var(--card);border-radius:var(--r);padding:12px;box-shadow:var(--sh)}
+    .skr{display:flex;justify-content:space-between;gap:8px;margin-bottom:9px}
+    .skl{height:12px;margin-bottom:4px}
+    .skbg{width:56px;height:20px;flex-shrink:0;border-radius:10px}
+    .skg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:9px}
+    .skce{height:28px}
+    .skbt{width:86px;height:28px;border-radius:7px}
+
+    /* Pagination */
+    .pager{display:flex;align-items:center;justify-content:center;gap:8px;
+           padding:12px 0 3px;flex-wrap:wrap}
+    .pgi{font-size:.77rem;color:var(--muted);font-weight:600}
+
+    /* Modal / Bottom sheet */
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:500;
+             overflow-y:auto;padding:16px 10px;align-items:flex-start;justify-content:center;
+             backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+    .overlay.on{display:flex}
+    .sheet{background:var(--card);border-radius:var(--r);width:100%;max-width:500px;
+           margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden}
+
+    @media(max-width:580px){
+      .overlay{align-items:flex-end;padding:0}
+      .sheet{border-radius:20px 20px 0 0;max-height:92dvh;overflow-y:auto;
+             margin:0;max-width:100%;padding-bottom:env(safe-area-inset-bottom,10px);
+             animation:sup .22s cubic-bezier(.25,.46,.45,.94)}
+      @keyframes sup{from{transform:translateY(100%)}}
+      .handle{display:block;width:34px;height:4px;background:var(--bdr);
+              border-radius:2px;margin:10px auto 6px}
+    }
+    @media(min-width:581px){
+      .sheet{animation:pop .18s ease}
+      @keyframes pop{from{opacity:0;transform:scale(.96) translateY(-6px)}}
+      .handle{display:none}
+    }
+
+    .shdr{background:linear-gradient(135deg,#4361ee,#3a0ca3);color:#fff;padding:13px 14px;
+          display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .shdr h3{font-size:.92rem;font-weight:800}
+    .shdr .sub{font-size:.7rem;opacity:.82;margin-top:2px;
+               max-width:calc(100% - 34px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .cbtn{background:rgba(255,255,255,.2);border:none;color:#fff;width:26px;height:26px;
+          border-radius:50%;font-size:.87rem;cursor:pointer;flex-shrink:0;
+          display:flex;align-items:center;justify-content:center}
+
+    .sbody{padding:13px}
+    .snap{background:linear-gradient(135deg,#f0f4ff,#e8f0ff);border:1px solid #c7d7ff;
+          border-radius:9px;padding:10px 12px;margin-bottom:12px}
+    .sna{font-weight:800;color:var(--pri);font-size:.92rem}
+    .snb{font-size:.7rem;color:var(--muted);margin-top:3px;display:flex;flex-wrap:wrap;gap:7px}
+
+    .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:360px){.fgrid{grid-template-columns:1fr}}
+    .ff{grid-column:1/-1}
+
+    .sftr{padding:11px 13px;background:var(--bg);display:flex;gap:7px;justify-content:flex-end}
+
+    /* Sections */
+    .sechdr{display:flex;align-items:center;justify-content:space-between;
+            flex-wrap:wrap;gap:7px;margin-bottom:9px}
+    .sect{font-size:.86rem;font-weight:800}
+    .secc{font-size:.71rem;color:var(--muted)}
+
+    /* Empty / error */
+    .estate{text-align:center;padding:36px 20px;color:var(--muted)}
+    .eico{font-size:2.4rem;margin-bottom:7px}
+    .estate p{font-size:.82rem}
 
     /* Toast */
-    .tbox { position:fixed; top:16px; right:16px; z-index:1000; display:flex; flex-direction:column; gap:7px; }
-    .toast { background:#fff; border-radius:10px; padding:11px 15px; box-shadow:0 4px 20px rgba(0,0,0,.14); font-size:.83rem; max-width:290px; border-left:4px solid var(--pri); animation:tin .27s ease; }
-    .tok  { border-left-color:var(--ok); } .terr { border-left-color:var(--danger); }
-    @keyframes tin { from { transform:translateX(110%); opacity:0; } }
+    .tb{position:fixed;top:12px;right:12px;z-index:1000;
+        display:flex;flex-direction:column;gap:6px;pointer-events:none}
+    .toast{background:var(--card);border-radius:9px;padding:10px 13px;
+           box-shadow:0 4px 20px rgba(0,0,0,.15);font-size:.8rem;max-width:270px;
+           border-left:3px solid var(--pri);animation:tin .22s ease;
+           pointer-events:all;color:var(--txt)}
+    .tok{border-left-color:var(--ok)} .terr{border-left-color:var(--err)}
+    @keyframes tin{from{transform:translateX(110%);opacity:0}}
 
-    .hidden { display:none !important; }
+    .hidden{display:none!important}
+    .mb9{margin-bottom:9px} .mt4{margin-top:4px}
   </style>
 </head>
 <body>
 
-<div class="hdr">
-  <h1>📋 Dropout Verification Portal</h1>
-  <p>Dropout Student Verification &amp; Admission Management — 2024-25</p>
-</div>
+<header class="hdr">
+  <h1>ðŸ“‹ Dropout Verification Portal</h1>
+  <p>Verification &amp; Admission Management â€” 2024-25</p>
+</header>
 
-<div class="tbox" id="tbox"></div>
+<div class="tb" id="tb"></div>
 
-<div class="wrap">
+<main class="page">
 
   <!-- Filter -->
   <div class="card">
-    <div class="clbl">🔍 Search</div>
-    <div class="fg3">
+    <div class="fg">
       <div>
         <label class="lbl">District</label>
-        <select id="selD" onchange="onDistChange()">
-          <option value="">Loading...</option>
-        </select>
+        <select id="selD" onchange="onDist()"><option value="">Loadingâ€¦</option></select>
       </div>
       <div>
         <label class="lbl">Block</label>
-        <select id="selB" disabled onchange="onBlockChange()">
-          <option value="">-- Select Block --</option>
+        <select id="selB" disabled onchange="onBlock()">
+          <option value="">â€” Select Block â€”</option>
         </select>
       </div>
       <div>
         <label class="lbl">School</label>
-        <select id="selS" disabled onchange="onSchoolChange()">
-          <option value="">-- Select School --</option>
+        <select id="selS" disabled onchange="onSchool()">
+          <option value="">â€” Select School â€”</option>
         </select>
       </div>
     </div>
-    <button class="btn bp bfull" id="loadBtn" onclick="loadStudents()" disabled>
-      👁️ &nbsp;View Students
+    <button class="btn bp bfull" id="btnL" disabled onclick="load()">
+      ðŸ‘ View Students
     </button>
   </div>
 
   <!-- Stats -->
-  <div id="statsWrap" class="hidden">
-    <div class="stats">
-      <div class="stat st"><div class="n" id="sT">0</div><div class="t">Total Students</div></div>
-      <div class="stat sp"><div class="n" id="sP">0</div><div class="t">Pending</div></div>
-      <div class="stat sv"><div class="n" id="sV">0</div><div class="t">Verified</div></div>
-      <div class="stat sa"><div class="n" id="sA">0</div><div class="t">Admitted</div></div>
-    </div>
+  <div class="stats mb9 hidden" id="statsW">
+    <div class="stat st"><div class="n" id="sT">0</div><div class="l">Total</div></div>
+    <div class="stat sp"><div class="n" id="sP">0</div><div class="l">Pending</div></div>
+    <div class="stat sv"><div class="n" id="sV">0</div><div class="l">Verified</div></div>
+    <div class="stat sa"><div class="n" id="sA">0</div><div class="l">Admitted</div></div>
   </div>
 
   <!-- Students -->
-  <div id="stuWrap" class="hidden">
-    <div class="card" style="padding-bottom:9px">
-      <div class="rhdr">
-        <span class="rtitle">👨‍🎓 Student List</span>
-        <span class="rcnt" id="rcnt"></span>
+  <div id="stuW" class="hidden">
+    <div class="card">
+      <div class="sechdr">
+        <span class="sect">ðŸ‘¨â€ðŸŽ“ Students</span>
+        <span class="secc" id="sCnt"></span>
       </div>
-      <div class="swrap">
-        <span class="sico">🔍</span>
-        <input type="text" id="srch" placeholder="Search by name, PEN, or father's name..." oninput="applyFilter()">
+      <div class="srw mb9">
+        <span class="sri">ðŸ”</span>
+        <input type="search" id="srch" placeholder="Search name, PEN, father's nameâ€¦" oninput="onSrch()">
       </div>
-      <div class="pills">
-        <span class="pill pall act" onclick="setFilter('all',this)">All</span>
-        <span class="pill ppen"     onclick="setFilter('pending',this)">Pending</span>
-        <span class="pill pver"     onclick="setFilter('verified',this)">Verified</span>
-        <span class="pill padm"     onclick="setFilter('admitted',this)">Admitted</span>
+      <div class="pills" id="pills">
+        <span class="pill pa on" data-f="all">All</span>
+        <span class="pill pp" data-f="pending">Pending</span>
+        <span class="pill pv" data-f="verified">Verified</span>
+        <span class="pill pm" data-f="admitted">Admitted</span>
       </div>
     </div>
-    <div id="spinWrap" class="hidden">
-      <div class="spwrap"><div class="spinner"></div><div style="color:var(--muted);font-size:.84rem">Loading data...</div></div>
+
+    <!-- Skeleton -->
+    <div id="skelW" class="hidden">
+      <div class="slist" id="skel"></div>
     </div>
-    <div id="slist" class="slist"></div>
-    <div id="empty" class="empty hidden"><div class="eico">🔎</div><p>No students found</p></div>
+
+    <!-- List -->
+    <div class="slist" id="sList"></div>
+
+    <!-- Pager -->
+    <div class="pager hidden" id="pager">
+      <button class="btn bsec bsm" id="bPrev" onclick="gp(-1)">â† Prev</button>
+      <span class="pgi" id="pgi"></span>
+      <button class="btn bsec bsm" id="bNext" onclick="gp(1)">Next â†’</button>
+    </div>
+
+    <!-- Empty -->
+    <div class="estate hidden" id="emptyS">
+      <div class="eico">ðŸ”Ž</div><p>No students found</p>
+    </div>
   </div>
 
-</div>
+</main>
 
-<!-- Modal -->
-<div class="overlay" id="ov">
-  <div class="modal">
-    <div class="mhdr">
+<!-- Bottom Sheet / Modal -->
+<div class="overlay" id="ov" onclick="bgc(event)">
+  <div class="sheet" id="sheet">
+    <div class="handle"></div>
+    <div class="shdr">
       <div>
-        <h3>✅ Verification Form</h3>
-        <div class="msub" id="mSub">—</div>
+        <h3>âœ… Verification Form</h3>
+        <div class="sub" id="mSub"></div>
       </div>
-      <button class="mcls" onclick="closeModal()">✕</button>
+      <button class="cbtn" onclick="close2()">âœ•</button>
     </div>
-    <div class="mbody">
-      <div class="mstu">
-        <div class="msname" id="mNm">—</div>
-        <div class="msmeta"><span id="mPen">—</span><span id="mCls">—</span><span id="mGen">—</span></div>
-        <div class="msmeta" style="margin-top:4px"><span id="mFat">—</span><span id="mMob">—</span></div>
+    <div class="sbody">
+      <div class="snap">
+        <div class="sna" id="mNm"></div>
+        <div class="snb">
+          <span id="mPen"></span><span id="mEl"></span><span id="mGn"></span>
+        </div>
+        <div class="snb mt4">
+          <span id="mFa"></span><span id="mMo"></span>
+        </div>
       </div>
-      <div class="fg2">
+      <div class="fgrid">
         <div>
           <label class="lbl">Class *</label>
-          <select id="fCls">
-            <option value="">-- Select --</option>
-            <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-            <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
-            <option>11</option><option>12</option>
+          <select id="fC">
+            <option value="">â€” Select â€”</option>
+            <option>1</option><option>2</option><option>3</option><option>4</option>
+            <option>5</option><option>6</option><option>7</option><option>8</option>
+            <option>9</option><option>10</option><option>11</option><option>12</option>
           </select>
         </div>
         <div>
           <label class="lbl">Stream</label>
-          <select id="fStr">
-            <option value="">-- NA --</option>
-            <option>Science</option><option>Commerce</option><option>Arts</option><option>Vocational</option>
+          <select id="fSt">
+            <option value="">â€” NA â€”</option>
+            <option>Science</option><option>Commerce</option>
+            <option>Arts</option><option>Vocational</option>
           </select>
         </div>
         <div>
           <label class="lbl">Cycle</label>
-          <select id="fCyc">
-            <option value="">-- Select --</option>
+          <select id="fCy">
+            <option value="">â€” Select â€”</option>
             <option value="I">Cycle I</option>
             <option value="II">Cycle II</option>
             <option value="Annual">Annual</option>
@@ -258,293 +337,276 @@
         </div>
         <div>
           <label class="lbl">Admission Date</label>
-          <input type="date" id="fDt">
+          <input type="date" id="fD">
         </div>
         <div>
           <label class="lbl">Roll Number</label>
-          <input type="text" id="fRl" placeholder="Roll No.">
+          <input type="text" id="fR" placeholder="Roll No.">
         </div>
         <div>
-          <label class="lbl">Fee (₹)</label>
-          <input type="number" id="fFe" placeholder="0" min="0">
+          <label class="lbl">Fee (â‚¹)</label>
+          <input type="number" id="fF" placeholder="0" min="0">
         </div>
-        <div class="full">
+        <div class="ff">
           <label class="lbl">Status *</label>
-          <select id="fSt">
+          <select id="fSs">
             <option value="Verified">Verified</option>
             <option value="Admitted">Admitted</option>
           </select>
         </div>
-        <div class="full">
-          <label class="lbl">Verified By — School Name *</label>
-          <input type="text" id="fBy" placeholder="Enter school name...">
+        <div class="ff">
+          <label class="lbl">Verified By â€” School Name *</label>
+          <input type="text" id="fB" placeholder="School nameâ€¦">
         </div>
-        <div class="full">
+        <div class="ff">
           <label class="lbl">Remarks</label>
-          <textarea id="fRem" rows="2" placeholder="Any notes or remarks..."></textarea>
+          <textarea id="fRe" rows="2" placeholder="Any notesâ€¦"></textarea>
         </div>
       </div>
     </div>
-    <div class="mftr">
-      <button class="btn bs" onclick="closeModal()">Cancel</button>
-      <button class="btn bo" id="saveBtn" onclick="doSave()">💾 &nbsp;Save</button>
+    <div class="sftr">
+      <button class="btn bsec" onclick="close2()">Cancel</button>
+      <button class="btn bo" id="saveBtn" onclick="save()">ðŸ’¾ Save</button>
     </div>
   </div>
 </div>
 
 <script>
-var allS = [], rendered = [], curF = 'all', curStu = null;
+'use strict';
+// â”€â”€ Config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Update API_URL after a new Apps Script deployment
+const API = 'https://script.google.com/macros/s/AKfycbyzSaoHlxDZuKvMWHU6MkJCVKX_fV16cTZPFygPqX-DceJRV975IIlSKlSqaGZn_I8S/exec';
+const PS  = 30; // page size
 
-// Init
-window.onload = function() {
-  var d = g('selD');
-  google.script.run
-    .withSuccessHandler(function(list) {
-      d.innerHTML = '<option value="">-- Select District --</option>';
-      list.forEach(function(v){ d.innerHTML += opt(v,v); });
-    })
-    .withFailureHandler(function(e){
-      d.innerHTML='<option value="">Error loading</option>';
-      toast('Failed to load districts: '+e.message,'err');
-    })
-    .getDistricts();
-};
+// â”€â”€ State â”€â”€
+let allS=[], filt=[], pg=1, fm='all', st=null, cur=null;
 
-// Cascading dropdowns
-function onDistChange() {
-  var dist = g('selD').value;
-  rst('selB','-- Select Block --');
-  rst('selS','-- Select School --');
-  g('loadBtn').disabled = true;
-  if (!dist) return;
-  g('selB').innerHTML = '<option>Loading...</option>';
-  google.script.run
-    .withSuccessHandler(function(list){
-      rst('selB','-- Select Block --');
-      list.forEach(function(v){ g('selB').innerHTML += opt(v,v); });
-      g('selB').disabled = false;
-    })
-    .withFailureHandler(function(){ toast('Failed to load blocks','err'); })
-    .getBlocks(dist);
+// â”€â”€ API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+async function api(p){
+  const u=new URL(API);
+  for(const[k,v] of Object.entries(p)) u.searchParams.set(k,String(v));
+  const r=await fetch(u);
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  const j=await r.json();
+  if(j&&j.error) throw new Error(j.error);
+  return j;
 }
 
-function onBlockChange() {
-  var dist = g('selD').value, block = g('selB').value;
-  rst('selS','-- Select School --');
-  g('loadBtn').disabled = true;
-  if (!block) return;
-  g('selS').innerHTML = '<option>Loading...</option>';
-  google.script.run
-    .withSuccessHandler(function(list){
-      rst('selS','-- Select School --');
-      list.forEach(function(v){ g('selS').innerHTML += opt(v,v); });
-      g('selS').disabled = false;
-    })
-    .withFailureHandler(function(){ toast('Failed to load schools','err'); })
-    .getSchools(dist, block);
+// â”€â”€ Dropdowns â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+async function onDist(){
+  const d=g('selD').value;
+  rst('selB','â€” Select Block â€”'); rst('selS','â€” Select School â€”');
+  g('btnL').disabled=true;
+  if(!d) return;
+  g('selB').innerHTML='<option>Loadingâ€¦</option>';
+  try{
+    const l=await api({action:'getBlocks',district:d});
+    rst('selB','â€” Select Block â€”');
+    l.forEach(v=>g('selB').innerHTML+=opt(v));
+    g('selB').disabled=false;
+  }catch(e){toast('Failed to load blocks','err')}
 }
-
-function onSchoolChange() { g('loadBtn').disabled = !g('selS').value; }
-
-// Load students
-function loadStudents() {
-  var dist = g('selD').value, block = g('selB').value, school = g('selS').value;
-  if (!dist || !block || !school) { toast('Please select district, block and school','err'); return; }
-  show('statsWrap'); show('stuWrap'); show('spinWrap');
-  hide('slist'); hide('empty');
-  g('srch').value = '';
-  g('loadBtn').disabled = true;
-  g('loadBtn').innerHTML = '⏳ &nbsp;Loading...';
-  google.script.run
-    .withSuccessHandler(function(res){
-      allS = res.students; curF = 'all';
-      g('sT').textContent = res.total;
-      g('sP').textContent = res.pending;
-      g('sV').textContent = res.verified;
-      g('sA').textContent = res.admitted;
-      rPills(); hide('spinWrap'); show('slist');
-      render(allS);
-      g('loadBtn').disabled = false;
-      g('loadBtn').innerHTML = '🔄 &nbsp;Refresh';
-    })
-    .withFailureHandler(function(e){
-      hide('spinWrap');
-      toast('Failed to load students: '+e.message,'err');
-      g('loadBtn').disabled = false;
-      g('loadBtn').innerHTML = '👁️ &nbsp;View Students';
-    })
-    .getStudents(dist, block, school);
+async function onBlock(){
+  const d=g('selD').value,b=g('selB').value;
+  rst('selS','â€” Select School â€”'); g('btnL').disabled=true;
+  if(!b) return;
+  g('selS').innerHTML='<option>Loadingâ€¦</option>';
+  try{
+    const l=await api({action:'getSchools',district:d,block:b});
+    rst('selS','â€” Select School â€”');
+    l.forEach(v=>g('selS').innerHTML+=opt(v));
+    g('selS').disabled=false;
+  }catch(e){toast('Failed to load schools','err')}
 }
+function onSchool(){g('btnL').disabled=!g('selS').value}
 
-// Render student cards
-function render(list) {
-  rendered = list;
-  g('rcnt').textContent = list.length + ' students found';
-  if (!list.length) { g('slist').innerHTML = ''; show('empty'); return; }
-  hide('empty');
-  g('slist').innerHTML = list.map(function(s, i){
-    var sl  = s.status.toLowerCase();
-    var bl  = { pending:'bp2', verified:'bv2', admitted:'ba2' }[sl] || 'bp2';
-    var lbl = s.status === 'Admitted' ? 'Admitted ✓' : s.status === 'Verified' ? 'Verified ✓' : 'Pending';
-    var vh  = '';
-    if (s.verInfo) {
-      var v = s.verInfo;
-      vh = '<div class="vbox"><div class="vtitle">📌 Verification Info <span style="font-weight:400;font-size:.7rem;color:#777">'+h(v.timestamp)+'</span></div>'+
-        '<div class="vgrid">'+
-        vc('Class',v.verifiedClass)+vc('Stream',v.stream)+vc('Cycle',v.cycle)+
-        vc('Roll No',v.rollNo)+vc('Fee',v.fee?'₹'+v.fee:'')+vc('Admission Date',v.admissionDate)+vc('Verified By',v.verifiedBy)+
-        '</div>'+(v.remarks?'<div class="vnote">💬 '+h(v.remarks)+'</div>':'')+
-        '</div>';
-    }
-    var bc  = s.status === 'Pending' ? 'bp' : 'bw';
-    var bl2 = s.status === 'Pending' ? '✏️ Verify' : '✏️ Update';
-    return '<div class="sc sc'+sl+'">' +
-      '<div class="stop"><div>' +
-        '<div class="sname">'+h(s.name||'—')+'</div>' +
-        '<div class="smeta">PEN: '+h(s.pen||'—')+' &bull; '+h(s.gender||'—')+' &bull; Eligible: Class '+h(s.eligibleClass||s.lastClass||'—')+'</div>' +
-      '</div><span class="badge '+bl+'">'+lbl+'</span></div>' +
-      '<div class="sdets">' +
-        dd("Father's Name", s.fatherName) +
-        dd("Mother's Name", s.motherName) +
-        dd('Mobile',        s.mobile) +
-        dd('Previous Class','Class '+(s.lastClass||'—')) +
-        dd('Eligible Class','Class '+(s.eligibleClass||'—')) +
-        dd('Sub Status',    s.subStatus) +
-      '</div>' + vh +
-      '<button class="btn '+bc+' bsm" onclick="openModal('+i+')">'+bl2+'</button>' +
-    '</div>';
-  }).join('');
-}
-
-function dd(l,v){ return '<div><div class="dl">'+l+'</div><div class="dv">'+h(v||'—')+'</div></div>'; }
-function vc(l,v){ if(!v) return ''; return '<div><div class="dl">'+l+'</div><div class="dv">'+h(v)+'</div></div>'; }
-
-// Filter & search
-function setFilter(f, el) { curF = f; rPills(); el.classList.add('act'); applyFilter(); }
-function applyFilter() {
-  var q = g('srch').value.toLowerCase().trim();
-  render(allS.filter(function(s){
-    var fok = curF === 'all' || s.status.toLowerCase() === curF;
-    var sok = !q ||
-      (s.name||'').toLowerCase().includes(q) ||
-      (s.pen||'').toLowerCase().includes(q) ||
-      (s.fatherName||'').toLowerCase().includes(q) ||
-      (s.motherName||'').toLowerCase().includes(q);
-    return fok && sok;
-  }));
-}
-
-// Modal
-function openModal(i) {
-  var s = rendered[i]; if (!s) return; curStu = s;
-  g('mNm').textContent  = s.name      || '—';
-  g('mSub').textContent = s.lastSchool || '';
-  g('mPen').textContent = 'PEN: '    + (s.pen    || '—');
-  g('mCls').textContent = 'Eligible: Class ' + (s.eligibleClass || s.lastClass || '—');
-  g('mGen').textContent = s.gender   || '';
-  g('mFat').textContent = 'Father: ' + (s.fatherName || '—');
-  g('mMob').textContent = '📱 '      + (s.mobile || 'N/A');
-  if (s.verInfo) {
-    var v = s.verInfo;
-    sv('fCls', v.verifiedClass||''); sv('fStr', v.stream||'');    sv('fCyc', v.cycle||'');
-    sv('fDt',  v.admissionDate||''); sv('fRl',  v.rollNo||'');    sv('fFe',  v.fee||'');
-    sv('fRem', v.remarks||'');       sv('fBy',  v.verifiedBy||''); sv('fSt',  v.status||'Verified');
-  } else {
-    sv('fCls', s.eligibleClass||''); sv('fStr',''); sv('fCyc','');
-    sv('fDt',  today());             sv('fRl','');  sv('fFe','');
-    sv('fRem', '');                  sv('fBy','');  sv('fSt','Verified');
+// â”€â”€ Load â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+async function load(){
+  const d=g('selD').value,b=g('selB').value,s=g('selS').value;
+  if(!d||!b||!s){toast('Select district, block and school','err');return}
+  const btn=g('btnL');
+  btn.disabled=true; btn.innerHTML='â³ Loadingâ€¦';
+  show('statsW'); show('stuW');
+  g('sList').innerHTML=''; showSkel(5);
+  g('srch').value=''; fm='all'; rPills();
+  try{
+    const r=await api({action:'getStudents',district:d,block:b,school:s});
+    allS=r.students||[];
+    g('sT').textContent=r.total||0; g('sP').textContent=r.pending||0;
+    g('sV').textContent=r.verified||0; g('sA').textContent=r.admitted||0;
+    hideSkel(); filt=allS; pg=1; render();
+    btn.disabled=false; btn.innerHTML='ðŸ”„ Refresh';
+    toast('Loaded '+(r.total||0)+' students','ok');
+  }catch(e){
+    hideSkel(); btn.disabled=false; btn.innerHTML='ðŸ‘ View Students';
+    toast('Load failed: '+e.message,'err');
   }
-  g('ov').classList.add('on');
-  document.body.style.overflow = 'hidden';
 }
 
-function closeModal() {
-  g('ov').classList.remove('on');
-  document.body.style.overflow = '';
-  curStu = null;
+// â”€â”€ Render (paginated) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function render(){
+  const tot=filt.length, pages=Math.max(1,Math.ceil(tot/PS));
+  pg=Math.min(pg,pages);
+  const s=(pg-1)*PS, e2=Math.min(s+PS,tot);
+  g('sCnt').textContent=tot+' students';
+  if(!tot){g('sList').innerHTML='';show('emptyS');hide('pager');return}
+  hide('emptyS');
+  g('sList').innerHTML=filt.slice(s,e2).map((st,i)=>card(st,s+i)).join('');
+  if(tot>PS){
+    show('pager');
+    g('pgi').textContent='Page '+pg+' / '+pages;
+    g('bPrev').disabled=pg===1; g('bNext').disabled=pg===pages;
+  }else hide('pager');
 }
-g('ov').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
 
-// Save verification
-function doSave() {
-  if (!curStu) return;
-  if (!g('fCls').value)        { toast('Please select a Class','err'); return; }
-  if (!g('fBy').value.trim())  { toast('"Verified By" school name is required','err'); return; }
-  var btn = g('saveBtn');
-  btn.disabled = true; btn.innerHTML = '⏳ Saving...';
-  var data = {
-    pen:          curStu.pen,
-    studentName:  curStu.name,
-    district:     curStu.district,
-    block:        curStu.block,
-    lastSchool:   curStu.lastSchool,
-    verifiedClass:g('fCls').value,
-    stream:       g('fStr').value,
-    cycle:        g('fCyc').value,
-    admissionDate:g('fDt').value,
-    rollNo:       g('fRl').value.trim(),
-    fee:          g('fFe').value,
-    remarks:      g('fRem').value.trim(),
-    verifiedBy:   g('fBy').value.trim(),
-    status:       g('fSt').value
+function card(s,idx){
+  const sl=s.status.toLowerCase();
+  const bl={pending:'bpen',verified:'bver',admitted:'badm'}[sl]||'bpen';
+  const lb=s.status==='Admitted'?'Admitted âœ“':s.status==='Verified'?'Verified âœ“':'Pending';
+  let vi='';
+  if(s.verInfo){
+    const v=s.verInfo;
+    vi=`<div class="vib"><div class="vit">ðŸ“Œ Verification <span style="font-weight:400;color:#888;font-size:.65rem">${h(v.timestamp)}</span></div>
+    <div class="vig">${vc('Class',v.verifiedClass)}${vc('Stream',v.stream)}${vc('Cycle',v.cycle)}
+    ${vc('Roll',v.rollNo)}${vc('Fee',v.fee?'â‚¹'+v.fee:'')}${vc('Date',v.admissionDate)}${vc('By',v.verifiedBy)}</div>
+    ${v.remarks?`<div style="margin-top:4px;color:#555;font-size:.69rem">ðŸ’¬ ${h(v.remarks)}</div>`:''}</div>`;
+  }
+  const bc=sl==='pending'?'bp':'bw';
+  const bt=sl==='pending'?'âœï¸ Verify':'âœï¸ Update';
+  return `<div class="sc ${sl}">
+    <div class="stop">
+      <div><div class="sname">${h(s.name||'â€”')}</div>
+      <div class="ssub">PEN:${h(s.pen||'â€”')} Â· ${h(s.gender||'â€”')} Â· Cl.${h(s.eligibleClass||s.lastClass||'â€”')}</div></div>
+      <span class="badge ${bl}">${lb}</span>
+    </div>
+    <div class="sgrid">
+      ${sf("Father",s.fatherName)}${sf("Mother",s.motherName)}${sf("Mobile",s.mobile)}
+      ${sf("Prev Cl","Cl."+(s.lastClass||'â€”'))}${sf("Eligible","Cl."+(s.eligibleClass||'â€”'))}${sf("Status",s.subStatus)}
+    </div>
+    ${vi}<button class="btn ${bc} bsm" onclick="openM(${idx})">${bt}</button>
+  </div>`;
+}
+const sf=(k,v)=>`<div class="sk"><div class="k">${k}</div><div class="v">${h(v||'â€”')}</div></div>`;
+const vc=(k,v)=>v?`<div><div class="k">${k}</div><div class="v">${h(v)}</div></div>`:'';
+
+function gp(d){pg+=d;render();scrollTo({top:0,behavior:'smooth'})}
+
+// â”€â”€ Filter + Search â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+document.getElementById('pills').addEventListener('click',e=>{
+  const p=e.target.closest('[data-f]');if(!p) return;
+  fm=p.dataset.f; rPills(); p.classList.add('on'); pg=1; applyF();
+});
+function onSrch(){clearTimeout(st);st=setTimeout(()=>{pg=1;applyF()},260)}
+function applyF(){
+  const q=g('srch').value.toLowerCase().trim();
+  filt=allS.filter(s=>{
+    const fo=fm==='all'||s.status.toLowerCase()===fm;
+    const so=!q||(s.name||'').toLowerCase().includes(q)||(s.pen||'').toLowerCase().includes(q)
+             ||(s.fatherName||'').toLowerCase().includes(q)||(s.motherName||'').toLowerCase().includes(q);
+    return fo&&so;
+  });
+  render();
+}
+
+// â”€â”€ Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function openM(idx){
+  const s=filt[idx];if(!s) return; cur=s;
+  g('mNm').textContent =s.name||'â€”';
+  g('mSub').textContent=s.lastSchool||'';
+  g('mPen').textContent='PEN: '+(s.pen||'â€”');
+  g('mEl').textContent ='Cl.'+(s.eligibleClass||s.lastClass||'â€”');
+  g('mGn').textContent =s.gender||'';
+  g('mFa').textContent ='Father: '+(s.fatherName||'â€”');
+  g('mMo').textContent ='ðŸ“± '+(s.mobile||'N/A');
+  if(s.verInfo){
+    const v=s.verInfo;
+    sv('fC',v.verifiedClass||'');sv('fSt',v.stream||'');sv('fCy',v.cycle||'');
+    sv('fD',v.admissionDate||'');sv('fR',v.rollNo||'');sv('fF',v.fee||'');
+    sv('fRe',v.remarks||'');sv('fB',v.verifiedBy||'');sv('fSs',v.status||'Verified');
+  }else{
+    sv('fC',s.eligibleClass||'');sv('fSt','');sv('fCy','');
+    sv('fD',tod());sv('fR','');sv('fF','');sv('fRe','');sv('fB','');sv('fSs','Verified');
+  }
+  g('ov').classList.add('on'); document.body.style.overflow='hidden';
+}
+function close2(){g('ov').classList.remove('on');document.body.style.overflow='';cur=null}
+function bgc(e){if(e.target===g('ov'))close2()}
+
+// â”€â”€ Save â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+async function save(){
+  if(!cur) return;
+  if(!g('fC').value){toast('Please select a Class','err');return}
+  if(!g('fB').value.trim()){toast('"Verified By" required','err');return}
+  const btn=g('saveBtn');
+  btn.disabled=true;btn.innerHTML='â³ Savingâ€¦';
+  const data={
+    pen:cur.pen,studentName:cur.name,district:cur.district,
+    block:cur.block,lastSchool:cur.lastSchool,
+    verifiedClass:g('fC').value,stream:g('fSt').value,cycle:g('fCy').value,
+    admissionDate:g('fD').value,rollNo:g('fR').value.trim(),fee:g('fF').value,
+    remarks:g('fRe').value.trim(),verifiedBy:g('fB').value.trim(),status:g('fSs').value
   };
-  google.script.run
-    .withSuccessHandler(function(res){
-      btn.disabled = false; btn.innerHTML = '💾 &nbsp;Save';
-      if (res.success) {
-        toast('✅ ' + res.message, 'ok');
-        curStu.status  = data.status;
-        curStu.verInfo = {
-          status:        data.status,
-          verifiedClass: data.verifiedClass,
-          stream:        data.stream,
-          cycle:         data.cycle,
-          admissionDate: data.admissionDate,
-          rollNo:        data.rollNo,
-          fee:           data.fee,
-          remarks:       data.remarks,
-          verifiedBy:    data.verifiedBy,
-          timestamp:     new Date().toLocaleDateString('en-IN') + ' ' +
-                         new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})
-        };
-        closeModal(); applyFilter(); updStats();
-      } else {
-        toast('❌ ' + res.message, 'err');
-      }
-    })
-    .withFailureHandler(function(e){
-      btn.disabled = false; btn.innerHTML = '💾 &nbsp;Save';
-      toast('❌ Save failed: ' + e.message, 'err');
-    })
-    .saveVerification(data);
+  try{
+    const r=await api({action:'save',data:JSON.stringify(data)});
+    btn.disabled=false;btn.innerHTML='ðŸ’¾ Save';
+    if(r.success){
+      toast('âœ… '+r.message,'ok');
+      cur.status=data.status;
+      cur.verInfo={status:data.status,verifiedClass:data.verifiedClass,stream:data.stream,
+        cycle:data.cycle,admissionDate:data.admissionDate,rollNo:data.rollNo,fee:data.fee,
+        remarks:data.remarks,verifiedBy:data.verifiedBy,
+        timestamp:new Date().toLocaleString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})};
+      close2();applyF();updS();
+    }else toast('âŒ '+r.message,'err');
+  }catch(e){btn.disabled=false;btn.innerHTML='ðŸ’¾ Save';toast('âŒ Save failed: '+e.message,'err')}
+}
+function updS(){
+  g('sT').textContent=allS.length;
+  g('sP').textContent=allS.filter(s=>s.status==='Pending').length;
+  g('sV').textContent=allS.filter(s=>s.status==='Verified').length;
+  g('sA').textContent=allS.filter(s=>s.status==='Admitted').length;
 }
 
-function updStats() {
-  g('sT').textContent = allS.length;
-  g('sP').textContent = allS.filter(function(s){ return s.status === 'Pending';  }).length;
-  g('sV').textContent = allS.filter(function(s){ return s.status === 'Verified'; }).length;
-  g('sA').textContent = allS.filter(function(s){ return s.status === 'Admitted'; }).length;
+// â”€â”€ Skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function showSkel(n){
+  g('skel').innerHTML=Array(n).fill(0).map(()=>`
+    <div class="skc"><div class="skr">
+      <div style="flex:1"><div class="ske skl" style="width:52%"></div><div class="ske skl" style="width:68%"></div></div>
+      <div class="ske skbg"></div></div>
+      <div class="skg">${Array(6).fill('<div class="ske skce"></div>').join('')}</div>
+      <div class="ske skbt"></div></div>`).join('');
+  show('skelW');
+}
+function hideSkel(){hide('skelW');g('skel').innerHTML=''}
+
+// â”€â”€ Utilities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const g   =id=>document.getElementById(id);
+const show=id=>g(id).classList.remove('hidden');
+const hide=id=>g(id).classList.add('hidden');
+const sv  =(id,v)=>g(id).value=v;
+const opt =v=>`<option value="${h(v)}">${h(v)}</option>`;
+const rst =(id,ph)=>{const el=g(id);el.innerHTML=`<option value="">${ph}</option>`;el.disabled=true};
+const rPills=()=>document.querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));
+const tod=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
+const pad=n=>String(n).padStart(2,'0');
+const h=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function toast(msg,t=''){
+  const el=document.createElement('div');
+  el.className='toast '+t;el.textContent=msg;g('tb').appendChild(el);
+  setTimeout(()=>{el.style.transition='opacity .26s';el.style.opacity='0';
+    setTimeout(()=>el.parentNode&&el.remove(),260)},3500);
 }
 
-// Utilities
-function g(id)    { return document.getElementById(id); }
-function show(id) { g(id).classList.remove('hidden'); }
-function hide(id) { g(id).classList.add('hidden'); }
-function sv(id,v) { g(id).value = v; }
-function rst(id, ph) { var el=g(id); el.innerHTML='<option value="">'+ph+'</option>'; el.disabled=true; }
-function opt(v,l) { return '<option value="'+h(v)+'">'+h(l)+'</option>'; }
-function rPills()  { document.querySelectorAll('.pill').forEach(function(p){ p.classList.remove('act'); }); }
-function today()  { var d=new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
-function pad(n)   { return String(n).padStart(2,'0'); }
-function h(s)     { return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function toast(msg, type) {
-  var c = g('tbox'), t = document.createElement('div');
-  t.className = 'toast ' + (type||''); t.textContent = msg; c.appendChild(t);
-  setTimeout(function(){
-    t.style.transition='opacity .3s'; t.style.opacity='0';
-    setTimeout(function(){ if(t.parentNode) c.removeChild(t); }, 300);
-  }, 4000);
-}
+// â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+(async()=>{
+  try{
+    const l=await api({action:'getDistricts'});
+    const s=g('selD');
+    s.innerHTML='<option value="">â€” Select District â€”</option>';
+    l.forEach(d=>s.innerHTML+=opt(d));
+  }catch(e){g('selD').innerHTML='<option value="">Error</option>';toast('Districts failed: '+e.message,'err')}
+})();
 </script>
 </body>
 </html>
+

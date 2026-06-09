@@ -9,11 +9,35 @@ var VERIFICATIONS_SHEET    = 'Verifications';
 
 // ─────────────────────────────────────────
 // WEB APP ENTRY POINT
+// Handles both: Apps Script HTML serving AND
+// GitHub Pages fetch() API calls
 // ─────────────────────────────────────────
 function doGet(e) {
-  return HtmlService.createHtmlOutputFromFile('Index')
-    .setTitle('Dropout Verification Portal')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  var action = e.parameter.action;
+
+  // No action = serve the embedded HTML (direct Apps Script access)
+  if (!action) {
+    return HtmlService.createHtmlOutputFromFile('Index')
+      .setTitle('Dropout Verification Portal')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
+
+  // URL-based JSON API (called from GitHub Pages via fetch)
+  try {
+    var result;
+    if      (action === 'getDistricts') result = getDistricts();
+    else if (action === 'getBlocks')    result = getBlocks(e.parameter.district);
+    else if (action === 'getSchools')   result = getSchools(e.parameter.district, e.parameter.block);
+    else if (action === 'getStudents')  result = getStudents(e.parameter.district, e.parameter.block, e.parameter.school);
+    else if (action === 'save')         result = saveVerification(JSON.parse(e.parameter.data));
+    else                                result = { error: 'Unknown action: ' + action };
+
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({ error: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 // ─────────────────────────────────────────
