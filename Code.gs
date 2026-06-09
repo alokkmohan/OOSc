@@ -4,7 +4,7 @@
 // ============================================================
 
 var SPREADSHEET_ID         = '11c6hAGriR8VGEIItBqx0sNrCCNqg0D1IrvHPN1xiv7A';
-var DATA_SHEET_NAME        = 'Sheet1';
+var DATA_SHEET_NAME        = 'Dropout list';
 var VERIFICATIONS_SHEET    = 'Verifications';
 
 // ─────────────────────────────────────────
