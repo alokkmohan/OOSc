@@ -1,0 +1,12 @@
+# Excel / data files (large binary — keep out of repo)
+*.xlsx
+*.xls
+*.csv
+
+# Clasp auth (contains OAuth tokens — never commit)
+.clasprc.json
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini

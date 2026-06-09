@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dropout Verification Portal</title>
+  <style>
+    :root {
+      --pri:    #4361ee; --pri-dk: #3451d1;
+      --ok:     #2dc653; --warn:   #f8961e;
+      --danger: #f72585; --info:   #4cc9f0;
+      --text:   #212529; --muted:  #6c757d;
+      --bg:     #eef0f5; --white:  #ffffff; --border: #dee2e6;
+      --shadow: 0 2px 10px rgba(0,0,0,.09);
+      --r: 12px; --ease: all .22s ease;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* Header */
+    .hdr { background: linear-gradient(135deg,#4361ee,#3a0ca3); color:#fff; padding:16px; text-align:center; position:sticky; top:0; z-index:100; box-shadow:0 3px 12px rgba(67,97,238,.35); }
+    .hdr h1 { font-size:1.25rem; font-weight:800; }
+    .hdr p  { font-size:.76rem; opacity:.82; margin-top:3px; }
+
+    .wrap { max-width:860px; margin:0 auto; padding:14px; }
+
+    /* Cards */
+    .card { background:var(--white); border-radius:var(--r); box-shadow:var(--shadow); padding:16px; margin-bottom:13px; }
+    .clbl { font-size:.7rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-bottom:11px; }
+
+    /* Form */
+    .fg3 { display:grid; grid-template-columns:repeat(3,1fr); gap:11px; margin-bottom:11px; }
+    @media(max-width:600px){ .fg3 { grid-template-columns:1fr; } }
+    .fg2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    @media(max-width:440px){ .fg2 { grid-template-columns:1fr; } }
+    .full { grid-column:1/-1; }
+
+    label.lbl { display:block; font-size:.71rem; font-weight:700; color:var(--muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:.3px; }
+    select, input[type=text], input[type=date], input[type=number], textarea {
+      width:100%; padding:9px 11px; border:1.5px solid var(--border); border-radius:8px;
+      font-size:.87rem; color:var(--text); background:#fff; transition:var(--ease);
+    }
+    select { appearance:none; -webkit-appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat:no-repeat; background-position:right 10px center; padding-right:30px; }
+    select:disabled { background-color:#f4f5f7; color:#adb5bd; }
+    select:focus, input:focus, textarea:focus { outline:none; border-color:var(--pri); box-shadow:0 0 0 3px rgba(67,97,238,.14); }
+
+    /* Buttons */
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:5px; padding:9px 17px; border:none; border-radius:8px; font-size:.87rem; font-weight:700; cursor:pointer; transition:var(--ease); white-space:nowrap; }
+    .btn:disabled { opacity:.5; cursor:not-allowed; }
+    .bp { background:var(--pri);    color:#fff; } .bp:hover:not(:disabled){ background:var(--pri-dk); transform:translateY(-1px); }
+    .bo { background:var(--ok);     color:#fff; } .bo:hover:not(:disabled){ background:#26b04a; }
+    .bw { background:var(--warn);   color:#fff; } .bw:hover:not(:disabled){ background:#e07b0d; }
+    .bs { background:#6c757d;       color:#fff; } .bs:hover:not(:disabled){ background:#565e64; }
+    .bsm { padding:6px 12px; font-size:.79rem; }
+    .bfull { width:100%; }
+
+    /* Stats */
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:9px; margin-bottom:13px; }
+    @media(max-width:560px){ .stats { grid-template-columns:repeat(2,1fr); } }
+    .stat { background:var(--white); border-radius:var(--r); padding:13px 8px; text-align:center; box-shadow:var(--shadow); }
+    .stat .n { font-size:1.9rem; font-weight:900; line-height:1; }
+    .stat .t { font-size:.68rem; color:var(--muted); margin-top:3px; font-weight:600; }
+    .st .n { color:var(--pri); } .sp .n { color:var(--warn); } .sv .n { color:var(--info); } .sa .n { color:var(--ok); }
+
+    /* Badges */
+    .badge { display:inline-block; padding:3px 9px; border-radius:20px; font-size:.67rem; font-weight:800; text-transform:uppercase; letter-spacing:.4px; white-space:nowrap; }
+    .bp2 { background:#fff3cd; color:#7d5a00; }
+    .bv2 { background:#cff4fc; color:#0c5460; }
+    .ba2 { background:#d1e7dd; color:#0f5132; }
+
+    /* Pills */
+    .pills { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+    .pill { padding:4px 12px; border-radius:20px; font-size:.73rem; font-weight:700; cursor:pointer; border:2px solid transparent; transition:var(--ease); user-select:none; }
+    .pall { background:#e9ecef; color:var(--text); } .pall.act { background:var(--pri); color:#fff; border-color:var(--pri); }
+    .ppen { background:#fff3cd; color:#7d5a00; }   .ppen.act { background:var(--warn); color:#fff; border-color:var(--warn); }
+    .pver { background:#cff4fc; color:#0c5460; }   .pver.act { background:var(--info); color:#fff; border-color:var(--info); }
+    .padm { background:#d1e7dd; color:#0f5132; }   .padm.act { background:var(--ok);   color:#fff; border-color:var(--ok); }
+
+    /* Student cards */
+    .slist { display:flex; flex-direction:column; gap:10px; }
+    .sc { background:var(--white); border-radius:var(--r); box-shadow:var(--shadow); padding:14px; border-left:4px solid var(--border); transition:var(--ease); }
+    .sc:hover { transform:translateY(-1px); box-shadow:0 5px 18px rgba(0,0,0,.11); }
+    .scpending  { border-left-color:var(--warn); }
+    .scverified { border-left-color:var(--info); }
+    .scadmitted { border-left-color:var(--ok);   }
+    .stop { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:9px; }
+    .sname { font-size:.97rem; font-weight:800; }
+    .smeta { font-size:.73rem; color:var(--muted); margin-top:2px; }
+    .sdets { display:grid; grid-template-columns:repeat(3,1fr); gap:6px 10px; font-size:.78rem; margin-bottom:10px; }
+    @media(max-width:480px){ .sdets { grid-template-columns:repeat(2,1fr); } }
+    .dl { color:var(--muted); font-size:.67rem; margin-bottom:1px; } .dv { font-weight:700; }
+
+    /* Ver-info box */
+    .vbox { background:#f6f8ff; border:1px solid #d0daff; border-radius:8px; padding:10px 12px; font-size:.77rem; margin-bottom:10px; }
+    .vtitle { font-weight:800; color:var(--pri); margin-bottom:6px; }
+    .vgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; }
+    @media(max-width:480px){ .vgrid { grid-template-columns:repeat(2,1fr); } }
+    .vnote { margin-top:5px; color:#444; }
+
+    /* Search */
+    .swrap { position:relative; margin-bottom:11px; }
+    .swrap input { padding-left:34px; }
+    .sico { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--muted); pointer-events:none; font-size:.88rem; }
+
+    /* Results header */
+    .rhdr { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:11px; }
+    .rtitle { font-size:.9rem; font-weight:800; } .rcnt { font-size:.76rem; color:var(--muted); }
+
+    /* Spinner / Empty */
+    .spwrap { display:flex; flex-direction:column; align-items:center; gap:12px; padding:46px 20px; }
+    .spinner { width:34px; height:34px; border:3px solid #ddd; border-top-color:var(--pri); border-radius:50%; animation:spin .75s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .empty { text-align:center; padding:46px 20px; color:var(--muted); }
+    .eico { font-size:2.6rem; margin-bottom:9px; }
+
+    /* Modal */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.52); z-index:500; overflow-y:auto; padding:18px 13px; align-items:flex-start; justify-content:center; }
+    .overlay.on { display:flex; }
+    .modal { background:#fff; border-radius:var(--r); width:100%; max-width:530px; margin:auto; box-shadow:0 24px 64px rgba(0,0,0,.28); overflow:hidden; }
+    .mhdr { background:linear-gradient(135deg,#4361ee,#3a0ca3); color:#fff; padding:15px 17px; display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .mhdr h3 { font-size:.96rem; font-weight:800; }
+    .msub { font-size:.74rem; opacity:.82; margin-top:2px; max-width:90%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .mcls { background:rgba(255,255,255,.22); border:none; color:#fff; width:27px; height:27px; border-radius:50%; font-size:.95rem; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+    .mbody { padding:16px; }
+    .mstu { background:linear-gradient(135deg,#f0f4ff,#e8f4ff); border:1px solid #c7d7ff; border-radius:8px; padding:11px; margin-bottom:15px; }
+    .msname { font-weight:800; color:var(--pri); font-size:.96rem; }
+    .msmeta { font-size:.74rem; color:var(--muted); margin-top:3px; display:flex; flex-wrap:wrap; gap:9px; }
+    .mftr { padding:13px 16px; background:#f8f9fa; display:flex; gap:9px; justify-content:flex-end; flex-wrap:wrap; }
+
+    /* Toast */
+    .tbox { position:fixed; top:16px; right:16px; z-index:1000; display:flex; flex-direction:column; gap:7px; }
+    .toast { background:#fff; border-radius:10px; padding:11px 15px; box-shadow:0 4px 20px rgba(0,0,0,.14); font-size:.83rem; max-width:290px; border-left:4px solid var(--pri); animation:tin .27s ease; }
+    .tok  { border-left-color:var(--ok); } .terr { border-left-color:var(--danger); }
+    @keyframes tin { from { transform:translateX(110%); opacity:0; } }
+
+    .hidden { display:none !important; }
+  </style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>📋 Dropout Verification Portal</h1>
+  <p>Dropout Student Verification &amp; Admission Management — 2024-25</p>
+</div>
+
+<div class="tbox" id="tbox"></div>
+
+<div class="wrap">
+
+  <!-- Filter -->
+  <div class="card">
+    <div class="clbl">🔍 Search</div>
+    <div class="fg3">
+      <div>
+        <label class="lbl">District</label>
+        <select id="selD" onchange="onDistChange()">
+          <option value="">Loading...</option>
+        </select>
+      </div>
+      <div>
+        <label class="lbl">Block</label>
+        <select id="selB" disabled onchange="onBlockChange()">
+          <option value="">-- Select Block --</option>
+        </select>
+      </div>
+      <div>
+        <label class="lbl">School</label>
+        <select id="selS" disabled onchange="onSchoolChange()">
+          <option value="">-- Select School --</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn bp bfull" id="loadBtn" onclick="loadStudents()" disabled>
+      👁️ &nbsp;View Students
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div id="statsWrap" class="hidden">
+    <div class="stats">
+      <div class="stat st"><div class="n" id="sT">0</div><div class="t">Total Students</div></div>
+      <div class="stat sp"><div class="n" id="sP">0</div><div class="t">Pending</div></div>
+      <div class="stat sv"><div class="n" id="sV">0</div><div class="t">Verified</div></div>
+      <div class="stat sa"><div class="n" id="sA">0</div><div class="t">Admitted</div></div>
+    </div>
+  </div>
+
+  <!-- Students -->
+  <div id="stuWrap" class="hidden">
+    <div class="card" style="padding-bottom:9px">
+      <div class="rhdr">
+        <span class="rtitle">👨‍🎓 Student List</span>
+        <span class="rcnt" id="rcnt"></span>
+      </div>
+      <div class="swrap">
+        <span class="sico">🔍</span>
+        <input type="text" id="srch" placeholder="Search by name, PEN, or father's name..." oninput="applyFilter()">
+      </div>
+      <div class="pills">
+        <span class="pill pall act" onclick="setFilter('all',this)">All</span>
+        <span class="pill ppen"     onclick="setFilter('pending',this)">Pending</span>
+        <span class="pill pver"     onclick="setFilter('verified',this)">Verified</span>
+        <span class="pill padm"     onclick="setFilter('admitted',this)">Admitted</span>
+      </div>
+    </div>
+    <div id="spinWrap" class="hidden">
+      <div class="spwrap"><div class="spinner"></div><div style="color:var(--muted);font-size:.84rem">Loading data...</div></div>
+    </div>
+    <div id="slist" class="slist"></div>
+    <div id="empty" class="empty hidden"><div class="eico">🔎</div><p>No students found</p></div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="ov">
+  <div class="modal">
+    <div class="mhdr">
+      <div>
+        <h3>✅ Verification Form</h3>
+        <div class="msub" id="mSub">—</div>
+      </div>
+      <button class="mcls" onclick="closeModal()">✕</button>
+    </div>
+    <div class="mbody">
+      <div class="mstu">
+        <div class="msname" id="mNm">—</div>
+        <div class="msmeta"><span id="mPen">—</span><span id="mCls">—</span><span id="mGen">—</span></div>
+        <div class="msmeta" style="margin-top:4px"><span id="mFat">—</span><span id="mMob">—</span></div>
+      </div>
+      <div class="fg2">
+        <div>
+          <label class="lbl">Class *</label>
+          <select id="fCls">
+            <option value="">-- Select --</option>
+            <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+            <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+            <option>11</option><option>12</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Stream</label>
+          <select id="fStr">
+            <option value="">-- NA --</option>
+            <option>Science</option><option>Commerce</option><option>Arts</option><option>Vocational</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Cycle</label>
+          <select id="fCyc">
+            <option value="">-- Select --</option>
+            <option value="I">Cycle I</option>
+            <option value="II">Cycle II</option>
+            <option value="Annual">Annual</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Admission Date</label>
+          <input type="date" id="fDt">
+        </div>
+        <div>
+          <label class="lbl">Roll Number</label>
+          <input type="text" id="fRl" placeholder="Roll No.">
+        </div>
+        <div>
+          <label class="lbl">Fee (₹)</label>
+          <input type="number" id="fFe" placeholder="0" min="0">
+        </div>
+        <div class="full">
+          <label class="lbl">Status *</label>
+          <select id="fSt">
+            <option value="Verified">Verified</option>
+            <option value="Admitted">Admitted</option>
+          </select>
+        </div>
+        <div class="full">
+          <label class="lbl">Verified By — School Name *</label>
+          <input type="text" id="fBy" placeholder="Enter school name...">
+        </div>
+        <div class="full">
+          <label class="lbl">Remarks</label>
+          <textarea id="fRem" rows="2" placeholder="Any notes or remarks..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="mftr">
+      <button class="btn bs" onclick="closeModal()">Cancel</button>
+      <button class="btn bo" id="saveBtn" onclick="doSave()">💾 &nbsp;Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var allS = [], rendered = [], curF = 'all', curStu = null;
+
+// Init
+window.onload = function() {
+  var d = g('selD');
+  google.script.run
+    .withSuccessHandler(function(list) {
+      d.innerHTML = '<option value="">-- Select District --</option>';
+      list.forEach(function(v){ d.innerHTML += opt(v,v); });
+    })
+    .withFailureHandler(function(e){
+      d.innerHTML='<option value="">Error loading</option>';
+      toast('Failed to load districts: '+e.message,'err');
+    })
+    .getDistricts();
+};
+
+// Cascading dropdowns
+function onDistChange() {
+  var dist = g('selD').value;
+  rst('selB','-- Select Block --');
+  rst('selS','-- Select School --');
+  g('loadBtn').disabled = true;
+  if (!dist) return;
+  g('selB').innerHTML = '<option>Loading...</option>';
+  google.script.run
+    .withSuccessHandler(function(list){
+      rst('selB','-- Select Block --');
+      list.forEach(function(v){ g('selB').innerHTML += opt(v,v); });
+      g('selB').disabled = false;
+    })
+    .withFailureHandler(function(){ toast('Failed to load blocks','err'); })
+    .getBlocks(dist);
+}
+
+function onBlockChange() {
+  var dist = g('selD').value, block = g('selB').value;
+  rst('selS','-- Select School --');
+  g('loadBtn').disabled = true;
+  if (!block) return;
+  g('selS').innerHTML = '<option>Loading...</option>';
+  google.script.run
+    .withSuccessHandler(function(list){
+      rst('selS','-- Select School --');
+      list.forEach(function(v){ g('selS').innerHTML += opt(v,v); });
+      g('selS').disabled = false;
+    })
+    .withFailureHandler(function(){ toast('Failed to load schools','err'); })
+    .getSchools(dist, block);
+}
+
+function onSchoolChange() { g('loadBtn').disabled = !g('selS').value; }
+
+// Load students
+function loadStudents() {
+  var dist = g('selD').value, block = g('selB').value, school = g('selS').value;
+  if (!dist || !block || !school) { toast('Please select district, block and school','err'); return; }
+  show('statsWrap'); show('stuWrap'); show('spinWrap');
+  hide('slist'); hide('empty');
+  g('srch').value = '';
+  g('loadBtn').disabled = true;
+  g('loadBtn').innerHTML = '⏳ &nbsp;Loading...';
+  google.script.run
+    .withSuccessHandler(function(res){
+      allS = res.students; curF = 'all';
+      g('sT').textContent = res.total;
+      g('sP').textContent = res.pending;
+      g('sV').textContent = res.verified;
+      g('sA').textContent = res.admitted;
+      rPills(); hide('spinWrap'); show('slist');
+      render(allS);
+      g('loadBtn').disabled = false;
+      g('loadBtn').innerHTML = '🔄 &nbsp;Refresh';
+    })
+    .withFailureHandler(function(e){
+      hide('spinWrap');
+      toast('Failed to load students: '+e.message,'err');
+      g('loadBtn').disabled = false;
+      g('loadBtn').innerHTML = '👁️ &nbsp;View Students';
+    })
+    .getStudents(dist, block, school);
+}
+
+// Render student cards
+function render(list) {
+  rendered = list;
+  g('rcnt').textContent = list.length + ' students found';
+  if (!list.length) { g('slist').innerHTML = ''; show('empty'); return; }
+  hide('empty');
+  g('slist').innerHTML = list.map(function(s, i){
+    var sl  = s.status.toLowerCase();
+    var bl  = { pending:'bp2', verified:'bv2', admitted:'ba2' }[sl] || 'bp2';
+    var lbl = s.status === 'Admitted' ? 'Admitted ✓' : s.status === 'Verified' ? 'Verified ✓' : 'Pending';
+    var vh  = '';
+    if (s.verInfo) {
+      var v = s.verInfo;
+      vh = '<div class="vbox"><div class="vtitle">📌 Verification Info <span style="font-weight:400;font-size:.7rem;color:#777">'+h(v.timestamp)+'</span></div>'+
+        '<div class="vgrid">'+
+        vc('Class',v.verifiedClass)+vc('Stream',v.stream)+vc('Cycle',v.cycle)+
+        vc('Roll No',v.rollNo)+vc('Fee',v.fee?'₹'+v.fee:'')+vc('Admission Date',v.admissionDate)+vc('Verified By',v.verifiedBy)+
+        '</div>'+(v.remarks?'<div class="vnote">💬 '+h(v.remarks)+'</div>':'')+
+        '</div>';
+    }
+    var bc  = s.status === 'Pending' ? 'bp' : 'bw';
+    var bl2 = s.status === 'Pending' ? '✏️ Verify' : '✏️ Update';
+    return '<div class="sc sc'+sl+'">' +
+      '<div class="stop"><div>' +
+        '<div class="sname">'+h(s.name||'—')+'</div>' +
+        '<div class="smeta">PEN: '+h(s.pen||'—')+' &bull; '+h(s.gender||'—')+' &bull; Eligible: Class '+h(s.eligibleClass||s.lastClass||'—')+'</div>' +
+      '</div><span class="badge '+bl+'">'+lbl+'</span></div>' +
+      '<div class="sdets">' +
+        dd("Father's Name", s.fatherName) +
+        dd("Mother's Name", s.motherName) +
+        dd('Mobile',        s.mobile) +
+        dd('Previous Class','Class '+(s.lastClass||'—')) +
+        dd('Eligible Class','Class '+(s.eligibleClass||'—')) +
+        dd('Sub Status',    s.subStatus) +
+      '</div>' + vh +
+      '<button class="btn '+bc+' bsm" onclick="openModal('+i+')">'+bl2+'</button>' +
+    '</div>';
+  }).join('');
+}
+
+function dd(l,v){ return '<div><div class="dl">'+l+'</div><div class="dv">'+h(v||'—')+'</div></div>'; }
+function vc(l,v){ if(!v) return ''; return '<div><div class="dl">'+l+'</div><div class="dv">'+h(v)+'</div></div>'; }
+
+// Filter & search
+function setFilter(f, el) { curF = f; rPills(); el.classList.add('act'); applyFilter(); }
+function applyFilter() {
+  var q = g('srch').value.toLowerCase().trim();
+  render(allS.filter(function(s){
+    var fok = curF === 'all' || s.status.toLowerCase() === curF;
+    var sok = !q ||
+      (s.name||'').toLowerCase().includes(q) ||
+      (s.pen||'').toLowerCase().includes(q) ||
+      (s.fatherName||'').toLowerCase().includes(q) ||
+      (s.motherName||'').toLowerCase().includes(q);
+    return fok && sok;
+  }));
+}
+
+// Modal
+function openModal(i) {
+  var s = rendered[i]; if (!s) return; curStu = s;
+  g('mNm').textContent  = s.name      || '—';
+  g('mSub').textContent = s.lastSchool || '';
+  g('mPen').textContent = 'PEN: '    + (s.pen    || '—');
+  g('mCls').textContent = 'Eligible: Class ' + (s.eligibleClass || s.lastClass || '—');
+  g('mGen').textContent = s.gender   || '';
+  g('mFat').textContent = 'Father: ' + (s.fatherName || '—');
+  g('mMob').textContent = '📱 '      + (s.mobile || 'N/A');
+  if (s.verInfo) {
+    var v = s.verInfo;
+    sv('fCls', v.verifiedClass||''); sv('fStr', v.stream||'');    sv('fCyc', v.cycle||'');
+    sv('fDt',  v.admissionDate||''); sv('fRl',  v.rollNo||'');    sv('fFe',  v.fee||'');
+    sv('fRem', v.remarks||'');       sv('fBy',  v.verifiedBy||''); sv('fSt',  v.status||'Verified');
+  } else {
+    sv('fCls', s.eligibleClass||''); sv('fStr',''); sv('fCyc','');
+    sv('fDt',  today());             sv('fRl','');  sv('fFe','');
+    sv('fRem', '');                  sv('fBy','');  sv('fSt','Verified');
+  }
+  g('ov').classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  g('ov').classList.remove('on');
+  document.body.style.overflow = '';
+  curStu = null;
+}
+g('ov').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+
+// Save verification
+function doSave() {
+  if (!curStu) return;
+  if (!g('fCls').value)        { toast('Please select a Class','err'); return; }
+  if (!g('fBy').value.trim())  { toast('"Verified By" school name is required','err'); return; }
+  var btn = g('saveBtn');
+  btn.disabled = true; btn.innerHTML = '⏳ Saving...';
+  var data = {
+    pen:          curStu.pen,
+    studentName:  curStu.name,
+    district:     curStu.district,
+    block:        curStu.block,
+    lastSchool:   curStu.lastSchool,
+    verifiedClass:g('fCls').value,
+    stream:       g('fStr').value,
+    cycle:        g('fCyc').value,
+    admissionDate:g('fDt').value,
+    rollNo:       g('fRl').value.trim(),
+    fee:          g('fFe').value,
+    remarks:      g('fRem').value.trim(),
+    verifiedBy:   g('fBy').value.trim(),
+    status:       g('fSt').value
+  };
+  google.script.run
+    .withSuccessHandler(function(res){
+      btn.disabled = false; btn.innerHTML = '💾 &nbsp;Save';
+      if (res.success) {
+        toast('✅ ' + res.message, 'ok');
+        curStu.status  = data.status;
+        curStu.verInfo = {
+          status:        data.status,
+          verifiedClass: data.verifiedClass,
+          stream:        data.stream,
+          cycle:         data.cycle,
+          admissionDate: data.admissionDate,
+          rollNo:        data.rollNo,
+          fee:           data.fee,
+          remarks:       data.remarks,
+          verifiedBy:    data.verifiedBy,
+          timestamp:     new Date().toLocaleDateString('en-IN') + ' ' +
+                         new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})
+        };
+        closeModal(); applyFilter(); updStats();
+      } else {
+        toast('❌ ' + res.message, 'err');
+      }
+    })
+    .withFailureHandler(function(e){
+      btn.disabled = false; btn.innerHTML = '💾 &nbsp;Save';
+      toast('❌ Save failed: ' + e.message, 'err');
+    })
+    .saveVerification(data);
+}
+
+function updStats() {
+  g('sT').textContent = allS.length;
+  g('sP').textContent = allS.filter(function(s){ return s.status === 'Pending';  }).length;
+  g('sV').textContent = allS.filter(function(s){ return s.status === 'Verified'; }).length;
+  g('sA').textContent = allS.filter(function(s){ return s.status === 'Admitted'; }).length;
+}
+
+// Utilities
+function g(id)    { return document.getElementById(id); }
+function show(id) { g(id).classList.remove('hidden'); }
+function hide(id) { g(id).classList.add('hidden'); }
+function sv(id,v) { g(id).value = v; }
+function rst(id, ph) { var el=g(id); el.innerHTML='<option value="">'+ph+'</option>'; el.disabled=true; }
+function opt(v,l) { return '<option value="'+h(v)+'">'+h(l)+'</option>'; }
+function rPills()  { document.querySelectorAll('.pill').forEach(function(p){ p.classList.remove('act'); }); }
+function today()  { var d=new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function pad(n)   { return String(n).padStart(2,'0'); }
+function h(s)     { return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(msg, type) {
+  var c = g('tbox'), t = document.createElement('div');
+  t.className = 'toast ' + (type||''); t.textContent = msg; c.appendChild(t);
+  setTimeout(function(){
+    t.style.transition='opacity .3s'; t.style.opacity='0';
+    setTimeout(function(){ if(t.parentNode) c.removeChild(t); }, 300);
+  }, 4000);
+}
+</script>
+</body>
+</html>
