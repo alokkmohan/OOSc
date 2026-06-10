@@ -442,8 +442,8 @@ function openA(idx){
   g('aGender').textContent=curA.gender||'--';
   g('aPen').textContent=curA.pen||'--';
   g('aElig').textContent='Cl.'+(curA.eligibleClass||curA.lastClass||'--');
-  sv('aC',a.admClass||(curA.eligibleClass||curA.lastClass||''));
   const a=curA.admInfo||{};
+  sv('aC',a.admClass||(curA.eligibleClass||curA.lastClass||''));
   sv('aSt',a.stream||'');sv('aCy',a.cycle||'');sv('aD',a.admDate||tod());
   g('ovA').classList.add('on');document.body.style.overflow='hidden';
 }
