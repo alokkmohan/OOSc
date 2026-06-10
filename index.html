@@ -162,7 +162,7 @@
       </div>
       <div>
         <label class="lbl">School</label>
-        <input type="text" id="selS" placeholder="Enter school name" oninput="onSchool()" disabled>
+        <select id="selS" disabled onchange="onSchool()"><option value="">-- Select School --</option></select>
       </div>
     </div>
     <button class="btn bp bfull" id="btnL" disabled onclick="load()">View Students</button>
@@ -225,12 +225,24 @@
       <!-- Pre-filled info -->
       <div class="pre-info">
         <div class="pre-row">
-          <div><div class="k">District</div><div class="v" id="aDist"></div></div>
-          <div><div class="k">Block</div><div class="v" id="aBlock"></div></div>
-          <div><div class="k">School</div><div class="v" id="aSchool" style="font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div></div>
           <div><div class="k">Gender</div><div class="v" id="aGender"></div></div>
           <div><div class="k">PEN</div><div class="v" id="aPen"></div></div>
           <div><div class="k">Eligible Class</div><div class="v" id="aElig"></div></div>
+        </div>
+      </div>
+      <!-- Editable location fields -->
+      <div class="fgrid2" style="margin-bottom:9px">
+        <div>
+          <label class="lbl">District *</label>
+          <select id="aDist" onchange="onADist()"><option value="">-- Select --</option></select>
+        </div>
+        <div>
+          <label class="lbl">Block *</label>
+          <select id="aBlock" disabled onchange="onABlock()"><option value="">-- Select --</option></select>
+        </div>
+        <div style="grid-column:1/-1">
+          <label class="lbl">School *</label>
+          <input type="text" id="aSchool" placeholder="Enter school name">
         </div>
       </div>
       <!-- Fields to fill -->
@@ -294,20 +306,31 @@ async function api(p){
 
 function onDist(){
   const d=g('selD').value;
-  rst('selB','-- Select Block --');
-  g('selS').value='';g('selS').disabled=true;
+  rst('selB','-- Select Block --');rst('selS','-- Select School --');
   g('btnL').disabled=true;
   if(!d) return;
   (hier.blocks[d]||[]).forEach(function(v){g('selB').innerHTML+=opt(v)});
   g('selB').disabled=false;
 }
 function onBlock(){
-  const b=g('selB').value;
-  g('selS').value='';g('btnL').disabled=true;
+  const d=g('selD').value,b=g('selB').value;
+  rst('selS','-- Select School --');g('btnL').disabled=true;
   if(!b) return;
-  g('selS').disabled=false;g('selS').focus();
+  (hier.schools[d+'||'+b]||[]).forEach(function(v){g('selS').innerHTML+=opt(v)});
+  g('selS').disabled=false;
 }
-function onSchool(){g('btnL').disabled=!g('selS').value.trim()}
+function onSchool(){g('btnL').disabled=!g('selS').value}
+
+/* Admission form district/block */
+function onADist(){
+  const d=g('aDist').value;
+  g('aBlock').innerHTML='<option value="">-- Select --</option>';
+  g('aBlock').disabled=true;
+  if(!d) return;
+  (hier.blocks[d]||[]).forEach(function(v){g('aBlock').innerHTML+=opt(v)});
+  g('aBlock').disabled=false;
+}
+function onABlock(){}
 
 async function load(){
   const d=g('selD').value,b=g('selB').value,s=g('selS').value.trim();
@@ -436,12 +459,23 @@ async function doVerify(){
 function openA(idx){
   curA=filt[idx];if(!curA) return;
   g('aNm').textContent=curA.name||'';
-  g('aDist').textContent=curA.district||'--';
-  g('aBlock').textContent=curA.block||'--';
-  g('aSchool').textContent=curA.lastSchool||'--';
   g('aGender').textContent=curA.gender||'--';
   g('aPen').textContent=curA.pen||'--';
   g('aElig').textContent='Cl.'+(curA.eligibleClass||curA.lastClass||'--');
+  // populate district dropdown
+  var dSel=g('aDist');
+  dSel.innerHTML='<option value="">-- Select --</option>';
+  (hier.districts||[]).forEach(function(d){dSel.innerHTML+=opt(d)});
+  sv('aDist',curA.district||'');
+  // populate block dropdown for pre-selected district
+  var bSel=g('aBlock');
+  bSel.innerHTML='<option value="">-- Select --</option>';
+  if(curA.district){
+    (hier.blocks[curA.district]||[]).forEach(function(v){bSel.innerHTML+=opt(v)});
+    bSel.disabled=false;
+  }else{bSel.disabled=true;}
+  sv('aBlock',curA.block||'');
+  g('aSchool').value=curA.lastSchool||'';
   const a=curA.admInfo||{};
   sv('aC',a.admClass||(curA.eligibleClass||curA.lastClass||''));
   sv('aSt',a.stream||'');sv('aCy',a.cycle||'');sv('aD',a.admDate||tod());
@@ -455,8 +489,8 @@ async function doAdmit(){
   if(!g('aCy').value){toast('Please select Cycle','terr');return}
   const btn=g('admBtn');btn.disabled=true;btn.textContent='Saving...';
   const data={
-    pen:curA.pen,studentName:curA.name,district:curA.district,
-    block:curA.block,lastSchool:curA.lastSchool,gender:curA.gender,
+    pen:curA.pen,studentName:curA.name,district:g('aDist').value,
+    block:g('aBlock').value,lastSchool:g('aSchool').value.trim(),gender:curA.gender,
     admClass:g('aC').value,stream:g('aSt').value,
     cycle:g('aCy').value,admDate:g('aD').value
   };
