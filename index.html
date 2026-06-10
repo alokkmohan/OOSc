@@ -162,7 +162,7 @@
       </div>
       <div>
         <label class="lbl">School</label>
-        <select id="selS" disabled onchange="onSchool()"><option value="">-- Select School --</option></select>
+        <input type="text" id="selS" placeholder="Enter school name" oninput="onSchool()" disabled>
       </div>
     </div>
     <button class="btn bp bfull" id="btnL" disabled onclick="load()">View Students</button>
@@ -294,23 +294,23 @@ async function api(p){
 
 function onDist(){
   const d=g('selD').value;
-  rst('selB','-- Select Block --');rst('selS','-- Select School --');
+  rst('selB','-- Select Block --');
+  g('selS').value='';g('selS').disabled=true;
   g('btnL').disabled=true;
   if(!d) return;
   (hier.blocks[d]||[]).forEach(function(v){g('selB').innerHTML+=opt(v)});
   g('selB').disabled=false;
 }
 function onBlock(){
-  const d=g('selD').value,b=g('selB').value;
-  rst('selS','-- Select School --');g('btnL').disabled=true;
+  const b=g('selB').value;
+  g('selS').value='';g('btnL').disabled=true;
   if(!b) return;
-  (hier.schools[d+'||'+b]||[]).forEach(function(v){g('selS').innerHTML+=opt(v)});
-  g('selS').disabled=false;
+  g('selS').disabled=false;g('selS').focus();
 }
-function onSchool(){g('btnL').disabled=!g('selS').value}
+function onSchool(){g('btnL').disabled=!g('selS').value.trim()}
 
 async function load(){
-  const d=g('selD').value,b=g('selB').value,s=g('selS').value;
+  const d=g('selD').value,b=g('selB').value,s=g('selS').value.trim();
   if(!d||!b||!s){toast('Select district, block and school','terr');return}
   const btn=g('btnL');
   btn.disabled=true;btn.textContent='Loading...';
