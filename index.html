@@ -236,8 +236,14 @@
       <!-- Fields to fill -->
       <div class="fgrid2">
         <div>
-          <label class="lbl">Class (Auto)</label>
-          <input type="text" id="aC" readonly style="background:#f1f5f9;font-weight:700;color:var(--pri);cursor:not-allowed">
+          <label class="lbl">Class *</label>
+          <select id="aC">
+            <option value="">-- Select --</option>
+            <option value="9">Class 9</option>
+            <option value="10">Class 10</option>
+            <option value="11">Class 11</option>
+            <option value="12">Class 12</option>
+          </select>
         </div>
         <div>
           <label class="lbl">Stream</label>
@@ -436,9 +442,7 @@ function openA(idx){
   g('aGender').textContent=curA.gender||'--';
   g('aPen').textContent=curA.pen||'--';
   g('aElig').textContent='Cl.'+(curA.eligibleClass||curA.lastClass||'--');
-  // class is locked to eligibleClass — cannot be changed
-  const lockedClass=curA.eligibleClass||curA.lastClass||'';
-  g('aC').value=lockedClass;
+  sv('aC',a.admClass||(curA.eligibleClass||curA.lastClass||''));
   const a=curA.admInfo||{};
   sv('aSt',a.stream||'');sv('aCy',a.cycle||'');sv('aD',a.admDate||tod());
   g('ovA').classList.add('on');document.body.style.overflow='hidden';
@@ -447,13 +451,13 @@ function closeA(){g('ovA').classList.remove('on');document.body.style.overflow='
 function bgcA(e){if(e.target===g('ovA'))closeA()}
 async function doAdmit(){
   if(!curA) return;
-  if(!g('aC').value){toast('Eligible class not found for this student','terr');return}
+  if(!g('aC').value){toast('Please select Class','terr');return}
   if(!g('aCy').value){toast('Please select Cycle','terr');return}
   const btn=g('admBtn');btn.disabled=true;btn.textContent='Saving...';
   const data={
     pen:curA.pen,studentName:curA.name,district:curA.district,
     block:curA.block,lastSchool:curA.lastSchool,gender:curA.gender,
-    admClass:curA.eligibleClass||curA.lastClass||'',stream:g('aSt').value,
+    admClass:g('aC').value,stream:g('aSt').value,
     cycle:g('aCy').value,admDate:g('aD').value
   };
   try{
