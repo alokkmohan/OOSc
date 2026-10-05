@@ -26,7 +26,7 @@ function doGet(e) {
   try {
     var result;
     if      (action === 'ping')         result = { ok:true, sheets: SpreadsheetApp.openById(SPREADSHEET_ID).getSheets().map(function(s){return s.getName()}) };
-    else if (action === 'clearCache')   { CacheService.getScriptCache().remove('hierarchy'); result = { ok:true, message:'Cache cleared' }; }
+    else if (action === 'clearCache')   { _clearCacheLarge('hierarchy_v1'); result = { ok:true, message:'Cache cleared' }; }
     else if (action === 'getHierarchy') result = getHierarchy();
     else if (action === 'getDistricts') result = getDistricts();
     else if (action === 'getBlocks')    result = getBlocks(e.parameter.district);
@@ -45,151 +45,164 @@ function doGet(e) {
 }
 
 // ─────────────────────────────────────────
-// API: Full hierarchy in ONE call (cached 6h)
+// API: Full hierarchy in ONE call (cached 6h with chunking)
 // Returns { districts:[], blocks:{d:[...]}, schools:{d_b:[...]} }
 // ─────────────────────────────────────────
 function getHierarchy() {
+  var dists = getDistricts();
+  return { districts: dists, blocks: {}, schools: {} };
+}
+
+// ─────────────────────────────────────────
+// API: Unique Districts (cached 6h)
+// ─────────────────────────────────────────
+function getDistricts() {
   var cache = CacheService.getScriptCache();
-  var cached = cache.get('hierarchy');
+  var cached = cache.get('districts_v5');
   if (cached) return JSON.parse(cached);
 
   var rows = _getDataRows();
-  var districts = {}, blocks = {}, schools = {};
-
+  var seen = {};
   rows.forEach(function(row) {
-    var d = _c(row[0]), b = _c(row[1]), s = _c(row[4]);
-    if (!d) return;
-    districts[d] = true;
-    if (b) {
-      if (!blocks[d]) blocks[d] = {};
-      blocks[d][b] = true;
-    }
-    if (b && s) {
-      var key = d + '||' + b;
-      if (!schools[key]) schools[key] = {};
-      schools[key][s] = true;
-    }
+    var d = _c(row[1]); // Col B = District Name
+    if (d) seen[d] = true;
   });
-
-  var result = {
-    districts: Object.keys(districts).sort(),
-    blocks: {},
-    schools: {}
-  };
-  Object.keys(blocks).forEach(function(d) {
-    result.blocks[d] = Object.keys(blocks[d]).sort();
-  });
-  Object.keys(schools).forEach(function(k) {
-    result.schools[k] = Object.keys(schools[k]).sort();
-  });
-
-  try { cache.put('hierarchy', JSON.stringify(result), 21600); } catch(e) {} // ignore if too large
+  var result = Object.keys(seen).sort();
+  try { cache.put('districts_v5', JSON.stringify(result), 21600); } catch(e){}
   return result;
 }
 
 // ─────────────────────────────────────────
-// API: Unique Districts
-// ─────────────────────────────────────────
-function getDistricts() {
-  var rows = _getDataRows();
-  var seen = {};
-  rows.forEach(function(row) {
-    var d = _c(row[0]);
-    if (d) seen[d] = true;
-  });
-  return Object.keys(seen).sort();
-}
-
-// ─────────────────────────────────────────
-// API: Blocks for a District
+// API: Blocks for a District (cached 6h)
 // ─────────────────────────────────────────
 function getBlocks(district) {
+  if (!district) return [];
+  var key = 'blk_v5_' + Utilities.base64EncodeWebSafe(_c(district));
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get(key);
+  if (cached) return JSON.parse(cached);
+
   var rows = _getDataRows();
   var seen = {};
   rows.forEach(function(row) {
-    if (_c(row[0]) === district) {
-      var b = _c(row[1]);
+    if (_c(row[1]) === district) { // Col B = District Name
+      var b = _c(row[2]);          // Col C = Block Name
       if (b) seen[b] = true;
     }
   });
-  return Object.keys(seen).sort();
+  var result = Object.keys(seen).sort();
+  try { cache.put(key, JSON.stringify(result), 21600); } catch(e){}
+  return result;
 }
 
 // ─────────────────────────────────────────
-// API: Schools for District + Block
+// API: Schools for District (+ optional Block) (cached 6h)
 // ─────────────────────────────────────────
 function getSchools(district, block) {
+  if (!district) return [];
+  var d = _c(district);
+  var b = _c(block);
+  var key = 'sch_v5_' + Utilities.base64EncodeWebSafe(d + (b ? '_' + b : ''));
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get(key);
+  if (cached) return JSON.parse(cached);
+
   var rows = _getDataRows();
   var seen = {};
   rows.forEach(function(row) {
-    if (_c(row[0]) === district && _c(row[1]) === block) {
-      var s = _c(row[4]);
-      if (s) seen[s] = true;
+    if (_c(row[1]) === d) { // Col B = District
+      if (!b || _c(row[2]) === b) { // Col C = Block
+        var s = _c(row[4]); // Col E = Last School
+        if (s) seen[s] = true;
+      }
     }
   });
-  return Object.keys(seen).sort();
+  var result = Object.keys(seen).sort();
+  try { cache.put(key, JSON.stringify(result), 21600); } catch(e){}
+  return result;
+}
+
+function _stuCacheKey(district, block, school) {
+  return 'stu_v5_' + Utilities.base64EncodeWebSafe(_c(district) + '_' + _c(block) + '_' + _c(school));
 }
 
 // ─────────────────────────────────────────
-// API: Students — col Q=Verified, Admission sheet=Admitted
+// API: Students (cached 2h)
 // ─────────────────────────────────────────
 function getStudents(district, block, school) {
+  if (!district || !school) return { students: [], total: 0, admitted: 0, verified: 0, pending: 0 };
+  var d = _c(district);
+  var b = _c(block);
+  var s = _c(school);
+  var key = _stuCacheKey(d, b, s);
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get(key);
+  if (cached) return JSON.parse(cached);
+
   var rows;
   try { rows = _getDataRows(); } catch(e) { throw new Error('_getDataRows: ' + e.message); }
   var admMap = _getAdmMap(); // PEN -> admission info
 
   var students = [];
   rows.forEach(function(row) {
-    if (_c(row[0]) !== district) return;
-    if (_c(row[1]) !== block)    return;
-    if (_c(row[4]) !== school)   return;
+    if (_c(row[1]) !== d) return;        // Col B = District
+    if (b && _c(row[2]) !== b) return;   // Col C = Block
+    if (_c(row[4]) !== s) return;        // Col E = Last School
 
-    var pen      = _c(row[5]);
-    var verified = _c(String(row[16])).toLowerCase() === 'yes';
+    var pen      = _c(row[0]);           // Col A = Student PEN
+    var name     = _c(row[5]);           // Col F = Student Name
+    var gender   = _c(row[6]);           // Col G = Sex
+    var mobile   = _c(row[7]);           // Col H = Mobile No
+    var mother   = _c(row[8]);           // Col I = Mother Name
+    var father   = _c(row[9]);           // Col J = Father Name
+    var subStat  = _c(row[10]);          // Col K = Sub Status
+    var lastCls  = _c(row[11]);          // Col L = Last Class
+    var eligCls  = _c(row[12]);          // Col M = Eligible Class
+    var verified = _c(String(row[16])).toLowerCase() === 'yes'; // Col Q = Verified
     var adm      = pen && admMap[pen] ? admMap[pen] : null;
 
     students.push({
-      district:      _c(row[0]),
-      block:         _c(row[1]),
+      district:      _c(row[1]),
+      block:         _c(row[2]),
       lastSchool:    _c(row[4]),
       pen:           pen,
-      name:          _c(row[7]),
-      gender:        _c(row[8]),
-      mobile:        _c(row[9]),
-      motherName:    _c(row[10]),
-      fatherName:    _c(row[11]),
-      subStatus:     _c(row[12]),
-      lastClass:     _c(row[13]),
-      eligibleClass: _c(row[14]),
+      name:          name,
+      gender:        gender,
+      mobile:        mobile,
+      motherName:    mother,
+      fatherName:    father,
+      subStatus:     subStat,
+      lastClass:     lastCls,
+      eligibleClass: eligCls,
       status:        adm ? 'Admitted' : (verified ? 'Verified' : 'Pending'),
       verInfo:       verified ? { timestamp: _c(String(row[17])) } : null,
       admInfo:       adm
     });
   });
 
-  return {
+  var result = {
     students: students,
     total:    students.length,
-    admitted: students.filter(function(s){ return s.status === 'Admitted';  }).length,
-    verified: students.filter(function(s){ return s.status === 'Verified';  }).length,
-    pending:  students.filter(function(s){ return s.status === 'Pending';   }).length
+    admitted: students.filter(function(st){ return st.status === 'Admitted';  }).length,
+    verified: students.filter(function(st){ return st.status === 'Verified';  }).length,
+    pending:  students.filter(function(st){ return st.status === 'Pending';   }).length
   };
+
+  try { cache.put(key, JSON.stringify(result), 7200); } catch(e){}
+  return result;
 }
 
 // ─────────────────────────────────────────
-// API: Save Admission to Admission sheet
+// API: Save Admission to Admission sheet (Ultra-fast textFinder)
 // ─────────────────────────────────────────
 function saveAdmission(data) {
   try {
-    var sheet = _getOrCreateVerSheet(); // creates/gets Admission sheet
-    var allData = sheet.getDataRange().getValues();
+    if (!data.pen) throw new Error('PEN is required');
 
-    var existingRow = -1;
-    for (var i = 1; i < allData.length; i++) {
-      if (_c(String(allData[i][1])) === _c(String(data.pen))) {
-        existingRow = i + 1; break;
-      }
-    }
+    var sheet = _getOrCreateVerSheet();
+    var finder = sheet.getRange("B:B").createTextFinder(String(data.pen).trim()).matchEntireCell(true);
+    var foundCell = finder.findNext();
+    var existingRow = foundCell ? foundCell.getRow() : -1;
 
     var tz  = Session.getScriptTimeZone();
     var row = [
@@ -210,6 +223,11 @@ function saveAdmission(data) {
       sheet.getRange(existingRow, 1, 1, row.length).setValues([row]);
     } else {
       sheet.appendRow(row);
+    }
+    
+    // Invalidate student list cache for this school
+    if (data.district && (data.lastSchool || data.school)) {
+      try { CacheService.getScriptCache().remove(_stuCacheKey(data.district, data.block || '', data.lastSchool || data.school)); } catch(e){}
     }
     return { success: true, message: 'Admission saved!' };
   } catch(err) {
@@ -244,40 +262,53 @@ function _getAdmMap() {
 }
 
 // ─────────────────────────────────────────
-// API: Save Verification
+// API: Save Verification (Search Col A & F for PEN + Batch Write)
 // Writes "Yes" to col Q (17) and timestamp to col R (18)
-// in the source "Dropout list " sheet, matched by PEN (col F = 6)
 // ─────────────────────────────────────────
 function saveVerification(data) {
   try {
+    if (!data.pen) throw new Error('PEN is required');
+
     var ss    = _getSS();
     var sheet = ss.getSheetByName(DATA_SHEET_NAME) || ss.getSheets()[0];
     if (!sheet) throw new Error('Data sheet not found');
 
-    var lastRow = sheet.getLastRow();
-    if (lastRow < 2) throw new Error('No data rows found');
+    var penStr = String(data.pen).trim();
 
-    var penCol   = 6;   // column F = PEN (1-based)
-    var verCol   = 17;  // column Q = Verified Yes/No (1-based)
-    var tsCol    = 18;  // column R = Timestamp (1-based)
-    var lastCol  = Math.max(sheet.getLastColumn(), tsCol);
-    var pens     = sheet.getRange(2, penCol, lastRow - 1, 1).getValues();
+    // 1. Search Column A (Student PEN)
+    var finder = sheet.getRange("A:A").createTextFinder(penStr).matchEntireCell(true);
+    var foundCell = finder.findNext();
 
-    var targetRow = -1;
-    for (var i = 0; i < pens.length; i++) {
-      if (_c(String(pens[i][0])) === _c(String(data.pen))) {
-        targetRow = i + 2; // +2 because data starts at row 2
-        break;
-      }
+    // 2. Fallback to Column F
+    if (!foundCell) {
+      finder = sheet.getRange("F:F").createTextFinder(penStr).matchEntireCell(true);
+      foundCell = finder.findNext();
     }
 
-    if (targetRow === -1) throw new Error('PEN not found: ' + data.pen);
+    // 3. Fallback to entire sheet search
+    if (!foundCell) {
+      finder = sheet.createTextFinder(penStr).matchEntireCell(true);
+      foundCell = finder.findNext();
+    }
 
+    if (!foundCell) throw new Error('PEN not found in sheet: ' + data.pen);
+
+    var targetRow = foundCell.getRow();
     var tz = Session.getScriptTimeZone();
     var ts = Utilities.formatDate(new Date(), tz, 'dd/MM/yyyy HH:mm');
 
-    sheet.getRange(targetRow, verCol).setValue('Yes');
-    sheet.getRange(targetRow, tsCol).setValue(ts);
+    // Save target admission class into Column M (Col 13 = Eligible Class to Import)
+    var targetCls = data.targetClass || data.admClass || data.eligibleClass;
+    if (targetCls) {
+      sheet.getRange(targetRow, 13).setValue(String(targetCls).trim());
+    }
+
+    // Single batch write for Cols Q & R (Cols 17 & 18 = Verified Yes & Timestamp)
+    sheet.getRange(targetRow, 17, 1, 2).setValues([['Yes', ts]]);
+
+    if (data.district && (data.lastSchool || data.school)) {
+      try { CacheService.getScriptCache().remove(_stuCacheKey(data.district, data.block || '', data.lastSchool || data.school)); } catch(e){}
+    }
 
     return { success: true, message: 'Student verified!', row: targetRow };
 
@@ -314,7 +345,11 @@ function _getOrCreateVerSheet() {
   var sheet = ss.getSheetByName(VERIFICATIONS_SHEET);
   if (!sheet) {
     sheet = ss.insertSheet(VERIFICATIONS_SHEET);
-    var hdrs = ['Timestamp','PEN','Student Name','District','Block','School','Gender','Class','Stream','Cycle','Admission Date'];
+  }
+  // Always ensure headers in row 1
+  var hdrs = ['Timestamp','PEN','Student Name','District','Block','School','Gender','Class','Stream','Cycle','Admission Date'];
+  var firstRow = sheet.getRange(1, 1, 1, hdrs.length).getValues()[0];
+  if (!firstRow[0] || String(firstRow[0]).trim() === '') {
     sheet.getRange(1, 1, 1, hdrs.length).setValues([hdrs])
          .setFontWeight('bold').setBackground('#4361ee').setFontColor('white');
     sheet.setFrozenRows(1);

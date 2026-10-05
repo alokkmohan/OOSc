@@ -145,7 +145,7 @@
 </head>
 <body>
 <header class="hdr">
-  <h1>Dropout Verification Portal</h1>
+  <h1>Dropout Verification Portal <span style="display:inline-block;background:rgba(255,255,255,0.22);padding:1px 7px;border-radius:10px;font-size:0.68rem;vertical-align:middle;margin-left:4px;">v1.36</span></h1>
   <p>Verification &amp; Admission Management &mdash; 2024-25</p>
 </header>
 <div class="tb" id="tb"></div>
@@ -166,6 +166,7 @@
       </div>
     </div>
     <button class="btn bp bfull" id="btnL" disabled onclick="load()">View Students</button>
+    <button class="btn bsec bsm" style="margin-top:7px;width:100%" onclick="resetAllCache()">🔄 Reset Cache &amp; Fresh Reload (डाटा ताज़ा रिफ़्रेश करें)</button>
   </div>
 
   <div class="stats hidden" id="statsW">
@@ -178,11 +179,15 @@
   <div id="stuW" class="hidden">
     <div class="card">
       <div class="pills" id="pills">
-        <span class="pill pa on" data-f="all">All</span>
-        <span class="pill pp" data-f="pending">Pending</span>
+        <span class="pill pa" data-f="all">All</span>
+        <span class="pill pp on" data-f="pending">Pending</span>
         <span class="pill pv" data-f="verified">Verified</span>
         <span class="pill pm" data-f="admitted">Admitted</span>
       </div>
+      <label style="display:flex;align-items:center;gap:7px;font-size:0.76rem;font-weight:700;color:var(--txt);margin-bottom:9px;cursor:pointer;user-select:none;">
+        <input type="checkbox" id="chkPendingOnly" checked onchange="onTogglePendingOnly(this)">
+        <span>सत्यापित छात्रों को छिपाएँ (Hide Verified Students)</span>
+      </label>
       <div class="srw">
         <span class="sri">S</span>
         <input type="search" id="srch" placeholder="Search name, PEN, father name..." oninput="onSrch()">
@@ -199,6 +204,10 @@
     <div class="estate hidden" id="emptyS">No students found</div>
   </div>
 </main>
+<footer style="text-align:center;padding:16px 10px 24px;font-size:0.75rem;color:var(--muted);border-top:1px solid var(--bdr);margin-top:20px;">
+  <div>Dropout Verification &amp; Field Data Collection Portal</div>
+  <div style="margin-top:4px;font-weight:700;color:var(--pri);">System Version: v1.36 (Build 36) &bull; Active</div>
+</footer>
 
 <!-- Verify Confirm -->
 <div class="overlay" id="ovV" onclick="bgcV(event)">
@@ -304,33 +313,101 @@ async function api(p){
   return j;
 }
 
-function onDist(){
+async function onDist(){
   const d=g('selD').value;
   rst('selB','-- Select Block --');rst('selS','-- Select School --');
   g('btnL').disabled=true;
   if(!d) return;
-  (hier.blocks[d]||[]).forEach(function(v){g('selB').innerHTML+=opt(v)});
-  g('selB').disabled=false;
+
+  const cacheKey = 'ooss_b_' + d;
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const blocks = JSON.parse(cached);
+      g('selB').innerHTML = '<option value="">-- Select Block --</option>' + blocks.map(opt).join('');
+      g('selB').disabled = false;
+      return;
+    }
+  } catch(e){}
+
+  g('selB').innerHTML = '<option value="">Loading blocks...</option>';
+  g('selB').disabled = true;
+
+  try {
+    const blocks = await api({action: 'getBlocks', district: d});
+    try { localStorage.setItem(cacheKey, JSON.stringify(blocks)); } catch(e){}
+    g('selB').innerHTML = '<option value="">-- Select Block --</option>' + blocks.map(opt).join('');
+    g('selB').disabled = false;
+  } catch(e) {
+    g('selB').innerHTML = '<option value="">Error loading blocks</option>';
+    toast('Failed to load blocks: ' + e.message, 'terr');
+  }
 }
-function onBlock(){
-  const d=g('selD').value,b=g('selB').value;
+
+async function onBlock(){
+  const d=g('selD').value, b=g('selB').value;
   rst('selS','-- Select School --');g('btnL').disabled=true;
   if(!b) return;
-  (hier.schools[d+'||'+b]||[]).forEach(function(v){g('selS').innerHTML+=opt(v)});
-  g('selS').disabled=false;
+
+  const cacheKey = 'ooss_s_' + d + '_' + b;
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const schools = JSON.parse(cached);
+      g('selS').innerHTML = '<option value="">-- Select School --</option>' + schools.map(opt).join('');
+      g('selS').disabled = false;
+      return;
+    }
+  } catch(e){}
+
+  g('selS').innerHTML = '<option value="">Loading schools...</option>';
+  g('selS').disabled = true;
+
+  try {
+    const schools = await api({action: 'getSchools', district: d, block: b});
+    try { localStorage.setItem(cacheKey, JSON.stringify(schools)); } catch(e){}
+    g('selS').innerHTML = '<option value="">-- Select School --</option>' + schools.map(opt).join('');
+    g('selS').disabled = false;
+  } catch(e) {
+    g('selS').innerHTML = '<option value="">Error loading schools</option>';
+    toast('Failed to load schools: ' + e.message, 'terr');
+  }
 }
 function onSchool(){g('btnL').disabled=!g('selS').value}
 
 /* Admission form district/block */
-function onADist(){
+async function onADist(){
   const d=g('aDist').value;
   g('aBlock').innerHTML='<option value="">-- Select --</option>';
   g('aBlock').disabled=true;
   if(!d) return;
-  (hier.blocks[d]||[]).forEach(function(v){g('aBlock').innerHTML+=opt(v)});
-  g('aBlock').disabled=false;
+
+  const cacheKey = 'ooss_b_' + d;
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const blocks = JSON.parse(cached);
+      g('aBlock').innerHTML = '<option value="">-- Select --</option>' + blocks.map(opt).join('');
+      g('aBlock').disabled = false;
+      return;
+    }
+  } catch(e){}
+
+  try {
+    const blocks = await api({action: 'getBlocks', district: d});
+    try { localStorage.setItem(cacheKey, JSON.stringify(blocks)); } catch(e){}
+    g('aBlock').innerHTML = '<option value="">-- Select --</option>' + blocks.map(opt).join('');
+    g('aBlock').disabled = false;
+  } catch(e) {}
 }
 function onABlock(){}
+
+function onTogglePendingOnly(chk){
+  fm = chk.checked ? 'pending' : 'all';
+  rPills();
+  pg = 1;
+  applyF();
+}
 
 async function load(){
   const d=g('selD').value,b=g('selB').value,s=g('selS').value.trim();
@@ -339,7 +416,9 @@ async function load(){
   btn.disabled=true;btn.textContent='Loading...';
   show('statsW');show('stuW');
   g('sList').innerHTML='';showSkel(5);
-  g('srch').value='';fm='all';rPills();
+  g('srch').value='';
+  fm = g('chkPendingOnly').checked ? 'pending' : 'all';
+  rPills();
   try{
     const r=await api({action:'getStudents',district:d,block:b,school:s});
     allS=r.students||[];
@@ -347,7 +426,7 @@ async function load(){
     g('sP').textContent=r.pending||0;
     g('sV').textContent=r.verified||0;
     g('sA').textContent=r.admitted||0;
-    hideSkel();filt=allS;pg=1;render();
+    hideSkel();filt=allS;pg=1;applyF();
     btn.disabled=false;btn.textContent='Refresh';
     toast('Loaded '+(r.total||0)+' students','tok');
   }catch(e){
@@ -416,7 +495,9 @@ const ai=function(k,v){return v?'<div><div class="k">'+k+'</div><div class="v">'
 function gp(d){pg+=d;render();scrollTo({top:0,behavior:'smooth'})}
 document.getElementById('pills').addEventListener('click',function(e){
   const p=e.target.closest('[data-f]');if(!p) return;
-  fm=p.dataset.f;rPills();p.classList.add('on');pg=1;applyF();
+  fm=p.dataset.f;
+  g('chkPendingOnly').checked = (fm === 'pending');
+  rPills();pg=1;applyF();
 });
 function onSrch(){clearTimeout(srchT);srchT=setTimeout(function(){pg=1;applyF()},260)}
 function applyF(){
@@ -543,18 +624,49 @@ function toast(msg,t){
   setTimeout(function(){el.style.transition='opacity .26s';el.style.opacity='0';
     setTimeout(function(){if(el.parentNode)el.remove()},260)},3500);
 }
-(async function(){
-  try{
-    const data=await api({action:'getHierarchy'});
-    hier=data;
-    const s=g('selD');
-    s.innerHTML='<option value="">-- Select District --</option>';
-    hier.districts.forEach(function(d){s.innerHTML+=opt(d)});
-    s.disabled=false;
-  }catch(e){
-    g('selD').innerHTML='<option value="">Error - Retry</option>';
-    g('selD').disabled=false;
-    toast('Failed to load: '+e.message,'terr');
+async function resetAllCache() {
+  try {
+    localStorage.clear();
+    sessionStorage.clear();
+    toast('Clearing server & browser cache...', 'tok');
+    await api({ action: 'clearCache' });
+  } catch(e){}
+  localStorage.clear();
+  sessionStorage.clear();
+  toast('Cache cleared! Refreshing...', 'tok');
+  setTimeout(function(){ location.reload(true); }, 500);
+}
+
+const DIST_KEY = 'ooss_dists_v5';
+
+function populateDistricts(dists){
+  const s = g('selD');
+  s.innerHTML = '<option value="">-- Select District --</option>';
+  (dists || []).forEach(function(d){ s.innerHTML += opt(d); });
+  s.disabled = false;
+}
+
+(async function initDistricts(){
+  const s = g('selD');
+  try {
+    const cached = localStorage.getItem(DIST_KEY);
+    if (cached) {
+      populateDistricts(JSON.parse(cached));
+      return;
+    }
+  } catch(e){}
+
+  s.innerHTML = '<option value="">Loading districts...</option>';
+  s.disabled = true;
+
+  try {
+    const dists = await api({action: 'getDistricts'});
+    populateDistricts(dists);
+    try { localStorage.setItem(DIST_KEY, JSON.stringify(dists)); } catch(e){}
+  } catch(e) {
+    s.innerHTML = '<option value="">Error - Refresh</option>';
+    s.disabled = false;
+    toast('Failed to load districts: ' + e.message, 'terr');
   }
 })();
 </script>

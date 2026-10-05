@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Out-of-School Student: Field Data Collection (v1.36)</title>
+  <style>
+    :root {
+      --navy: #1c3866; --navy-dark: #142845; --green: #16a34a; --red: #dc2626;
+      --orange: #ea580c; --gray: #64748b; --bg: #f1f5f9; --card: #ffffff;
+      --border: rgba(15,23,42,0.1); --text: #0f172a; --muted: #64748b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: var(--bg); color: var(--text); margin: 0; padding: 16px;
+    }
+    .page-header { text-align: center; margin-bottom: 16px; }
+    .table-title { font-size: 1.05rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .table-instruction { font-size: 0.82rem; color: var(--muted); margin-bottom: 12px; }
+    h1 { font-size: 1.3rem; margin: 0 0 4px; color: var(--navy); }
+    p.sub { color: var(--muted); margin: 0; font-size: 0.85rem; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+    }
+    .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+    .field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 160px; }
+    .field label { font-size: 0.78rem; font-weight: 600; color: var(--muted); }
+    select, input[type=text], textarea {
+      padding: 9px 10px; border: 1px solid var(--border); border-radius: 6px;
+      font-size: 0.9rem; background: #fff; color: var(--text); width: 100%;
+    }
+    button {
+      padding: 9px 16px; border: none; border-radius: 6px; font-size: 0.85rem;
+      font-weight: 600; cursor: pointer; background: var(--navy); color: #fff;
+    }
+    button:hover { background: var(--navy-dark); }
+    button.secondary { background: #e2e8f0; color: var(--text); }
+    button.secondary:hover { background: #cbd5e1; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-spinner {
+      display: inline-block; width: 13px; height: 13px; margin-right: 6px;
+      border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff;
+      border-radius: 50%; vertical-align: -2px;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #saveBtn.success { background: var(--green); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; white-space: nowrap; }
+    .col-school {
+      max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    td.col-school { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    thead th {
+      text-align: left; padding: 10px 8px; background: #f8fafc; color: var(--muted);
+      border-bottom: 1px solid var(--border); position: sticky; top: 0;
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.03em;
+    }
+    tbody td { padding: 9px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tbody tr:hover td { background: #f8fafc; }
+    .table-wrap { overflow-x: auto; max-height: 65vh; overflow-y: auto; }
+
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600; }
+    .badge-v136 { background: #4361ee; color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; margin-left: 6px; }
+    .badge-studying { background: rgba(22,163,74,0.12); color: #15803d; }
+    .badge-notstudying { background: rgba(234,88,12,0.12); color: #c2410c; }
+    .badge-deceased { background: rgba(220,38,38,0.12); color: #b91c1c; }
+    .badge-none { background: rgba(100,116,139,0.12); color: #475569; }
+
+    #status { font-size: 0.85rem; color: var(--muted); margin-top: 8px; }
+    #status.error { color: var(--red); }
+
+    #overlay {
+      display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.55);
+      align-items: center; justify-content: center; z-index: 50; padding: 16px;
+    }
+    #overlay.show { display: flex; }
+    #modal {
+      background: #fff; border-radius: 10px; padding: 20px; width: 100%; max-width: 440px;
+      max-height: 90vh; overflow-y: auto;
+    }
+    #modal h2 { font-size: 1.05rem; margin: 0 0 2px; }
+    #modal .student-meta { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; }
+    .q-group { margin-bottom: 14px; }
+    .q-group > label.qlabel { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
+    .radio-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .radio-opt {
+      border: 1px solid var(--border); border-radius: 6px; padding: 7px 12px;
+      font-size: 0.82rem; cursor: pointer; user-select: none;
+    }
+    .radio-opt.selected { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .hidden { display: none !important; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+    #modalError { color: var(--red); font-size: 0.8rem; margin-top: 6px; }
+
+    #loadingOverlay {
+      position: fixed; inset: 0; background: var(--bg); display: flex;
+      flex-direction: column; align-items: center; justify-content: center; z-index: 100;
+      gap: 12px; font-size: 0.95rem; color: var(--muted);
+    }
+    .spinner {
+      width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--navy);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <div id="loadingOverlay">
+    <div class="spinner"></div>
+    <div id="loadingText">Loading student list…</div>
+  </div>
+
+  <div class="page-header">
+    <h1>Out-of-School Student: Field Data Collection <span class="badge-v136">v1.36</span></h1>
+    <p class="sub">District चुनें, फिर list में से student का status भरें। दुबारा भरने पर पुराना entry update हो जाएगा।</p>
+  </div>
+
+  <div class="card">
+    <div class="filters">
+      <div class="field">
+        <label>Your Name / Designation (Collected By)</label>
+        <input type="text" id="collectedBy" placeholder="e.g. Ramesh Kumar, CRC Nakur">
+      </div>
+      <button type="button" class="secondary" onclick="resetAppCache()" style="align-self:flex-end;">🔄 Reset Cache &amp; Fresh Reload</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="filters">
+      <div class="field">
+        <label>District *</label>
+        <select id="districtSelect" onchange="onDistrictChange()"><option value="">Loading...</option></select>
+      </div>
+      <div class="field">
+        <label>School *</label>
+        <select id="schoolSelect" disabled onchange="onSchoolChange()"><option value="">Select district first...</option></select>
+      </div>
+      <div class="field">
+        <label>🔍 Direct Search (UDISE / School / Student / PEN)</label>
+        <input type="text" id="searchInput" placeholder="Type UDISE Code, School, or Student Name..." oninput="onSearchInput()">
+      </div>
+    </div>
+    <div style="margin-top:10px;">
+      <label style="font-size:0.8rem;font-weight:600;cursor:pointer;user-select:none;">
+        <input type="checkbox" id="chkHideVerified" checked onchange="renderTable()"> <span>सत्यापित छात्रों को छिपाएँ (Hide Verified Students)</span>
+      </label>
+    </div>
+    <div id="status"></div>
+  </div>
+
+  <div class="card">
+    <h2 class="table-title">छात्र सूची</h2>
+    <p class="table-instruction">हर student की detail के अंत में उसकी वर्तमान स्थिति update करें।</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Block Name</th><th>UDISE Code</th><th class="col-school">School Name</th>
+            <th>Student PEN</th><th>Student Name</th><th>Sex</th><th>Mobile No</th>
+            <th>Mother Name</th><th>Father Name</th>
+            <th>Class</th>
+            <th>→ स्थिति</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="12" style="color:var(--muted);padding:20px;text-align:center;">Select District and School to view student list.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Verification Modal -->
+  <div id="overlay">
+    <div id="modal">
+      <h2 id="modalName"></h2>
+      <div class="student-meta" id="modalMeta"></div>
+
+      <div class="q-group">
+        <label class="qlabel">क्या छात्र वर्तमान में पढ़ रहा है?</label>
+        <div class="radio-row" id="q1">
+          <div class="radio-opt" data-value="Studying">पढ़ रहा है</div>
+          <div class="radio-opt" data-value="NotStudying">नहीं पढ़ रहा है</div>
+          <div class="radio-opt" data-value="Deceased">दिवंगत</div>
+        </div>
+      </div>
+
+      <div class="q-group hidden" id="q2Group">
+        <label class="qlabel">क्या छात्र आगे पढ़ने के लिए इच्छुक है?</label>
+        <div class="radio-row" id="q2">
+          <div class="radio-opt" data-value="Yes">हाँ</div>
+          <div class="radio-opt" data-value="No">नहीं</div>
+        </div>
+      </div>
+
+      <div class="q-group hidden" id="q3Group">
+        <label class="qlabel">अध्ययन का माध्यम</label>
+        <div class="radio-row" id="q3">
+          <div class="radio-opt" data-value="Regular">नियमित विद्यालय (Regular)</div>
+          <div class="radio-opt" data-value="NIOS">NIOS (मुक्त विद्यालय)</div>
+        </div>
+      </div>
+
+      <!-- New Class Selection Question (Saves into Column M = Eligible Class to Import) -->
+      <div class="q-group hidden" id="q4Group">
+        <label class="qlabel">किस कक्षा में प्रवेश लेना चाहते हैं? *</label>
+        <div class="radio-row" id="q4">
+          <div class="radio-opt" data-value="9">कक्षा 9</div>
+          <div class="radio-opt" data-value="10">कक्षा 10</div>
+          <div class="radio-opt" data-value="11">कक्षा 11</div>
+          <div class="radio-opt" data-value="12">कक्षा 12</div>
+        </div>
+      </div>
+
+      <div class="q-group">
+        <label class="qlabel">टिप्पणी (वैकल्पिक)</label>
+        <textarea id="remarksInput" rows="2" placeholder="कोई अतिरिक्त जानकारी..."></textarea>
+      </div>
+
+      <div id="modalError"></div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary" onclick="closeModal()">रद्द करें</button>
+        <button type="button" id="saveBtn" onclick="submitVerification()">सहेजें</button>
+      </div>
+    </div>
+  </div>
+
+  <footer style="text-align:center;padding:16px;font-size:0.75rem;color:var(--muted);border-top:1px solid var(--border);margin-top:20px;">
+    <div>Field Data Collection Portal &bull; System Version: v1.36 (Build 36)</div>
+  </footer>
+
+<script>
+'use strict';
+const API = 'https://script.google.com/macros/s/AKfycbwRLG-w3IikBua37lag-yM085PR33lWQ26MxLGAHS8SI4X3XhiHzJTXUac6nsQCHq48/exec';
+
+let allStudents = [];
+let filteredStudents = [];
+let currentStudent = null;
+
+let selQ1 = '';
+let selQ2 = '';
+let selQ3 = '';
+let selQ4 = '';
+
+async function apiCall(params) {
+  const url = new URL(API);
+  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const j = await r.json();
+  if (j && j.error) throw new Error(j.error);
+  return j;
+}
+
+async function initDistricts() {
+  const sel = document.getElementById('districtSelect');
+  try {
+    const cached = localStorage.getItem('ooss_dists_v5');
+    if (cached) {
+      populateDistricts(JSON.parse(cached));
+      document.getElementById('loadingOverlay').style.display = 'none';
+      return;
+    }
+  } catch(e){}
+
+  try {
+    const dists = await apiCall({ action: 'getDistricts' });
+    populateDistricts(dists);
+    try { localStorage.setItem('ooss_dists_v5', JSON.stringify(dists)); } catch(e){}
+  } catch(e) {
+    sel.innerHTML = '<option value="">Error loading districts</option>';
+  } finally {
+    document.getElementById('loadingOverlay').style.display = 'none';
+  }
+}
+
+function populateDistricts(dists) {
+  const sel = document.getElementById('districtSelect');
+  sel.innerHTML = '<option value="">Select District...</option>' + (dists||[]).map(d => `<option value="${d}">${d}</option>`).join('');
+  sel.disabled = false;
+}
+
+async function onDistrictChange() {
+  const d = document.getElementById('districtSelect').value;
+  const sSel = document.getElementById('schoolSelect');
+  sSel.innerHTML = '<option value="">Loading schools...</option>';
+  sSel.disabled = true;
+  if (!d) return;
+
+  const cacheKey = 'ooss_sch_' + d;
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      populateSchools(JSON.parse(cached));
+      return;
+    }
+  } catch(e){}
+
+  try {
+    const schools = await apiCall({ action: 'getSchools', district: d });
+    populateSchools(schools);
+    try { localStorage.setItem(cacheKey, JSON.stringify(schools)); } catch(e){}
+  } catch(e) {
+    sSel.innerHTML = '<option value="">Error loading schools</option>';
+  }
+}
+
+function populateSchools(schools) {
+  const sSel = document.getElementById('schoolSelect');
+  sSel.innerHTML = '<option value="">-- All Schools in District --</option>' + (schools||[]).map(s => `<option value="${s}">${s}</option>`).join('');
+  sSel.disabled = false;
+  loadStudents();
+}
+
+async function onSchoolChange() {
+  loadStudents();
+}
+
+async function loadStudents() {
+  const d = document.getElementById('districtSelect').value;
+  const s = document.getElementById('schoolSelect').value;
+  if (!d) return;
+
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  try {
+    const res = await apiCall({ action: 'getStudents', district: d, school: s });
+    allStudents = res.students || [];
+    renderTable();
+  } catch(e) {
+    document.getElementById('tbody').innerHTML = `<tr><td colspan="12" style="color:var(--red);padding:20px;text-align:center;">Failed to load: ${e.message}</td></tr>`;
+  } finally {
+    document.getElementById('loadingOverlay').style.display = 'none';
+  }
+}
+
+function onSearchInput() {
+  renderTable();
+}
+
+function renderTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  const hideVer = document.getElementById('chkHideVerified').checked;
+
+  filteredStudents = allStudents.filter(st => {
+    if (hideVer && st.status !== 'Pending') return false;
+    if (!q) return true;
+    return (st.name||'').toLowerCase().includes(q) ||
+           (st.pen||'').toLowerCase().includes(q) ||
+           (st.fatherName||'').toLowerCase().includes(q) ||
+           (st.lastSchool||'').toLowerCase().includes(q);
+  });
+
+  const tbody = document.getElementById('tbody');
+  if (!filteredStudents.length) {
+    tbody.innerHTML = '<tr><td colspan="12" style="color:var(--muted);padding:20px;text-align:center;">No matching students found.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filteredStudents.map((st, idx) => {
+    const isVer = st.status === 'Verified' || st.status === 'Admitted';
+    const btnText = isVer ? '✓ Updated' : 'वर्तमान स्थिति';
+    const btnClass = isVer ? 'secondary' : '';
+    return `<tr>
+      <td>${h(st.block)}</td>
+      <td>--</td>
+      <td class="col-school">${h(st.lastSchool)}</td>
+      <td><strong>${h(st.pen)}</strong></td>
+      <td><strong>${h(st.name)}</strong></td>
+      <td>${h(st.gender)}</td>
+      <td>${h(st.mobile)}</td>
+      <td>${h(st.motherName)}</td>
+      <td>${h(st.fatherName)}</td>
+      <td>${h(st.eligibleClass||st.lastClass||'--')}</td>
+      <td><span class="badge ${isVer?'badge-studying':'badge-none'}">${h(st.status)}</span></td>
+      <td><button type="button" class="${btnClass}" onclick="openModal(${idx})">${btnText}</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function openModal(idx) {
+  currentStudent = filteredStudents[idx];
+  if (!currentStudent) return;
+
+  document.getElementById('modalName').textContent = currentStudent.name || 'Student Detail';
+  document.getElementById('modalMeta').textContent = `पिता: ${currentStudent.fatherName||'--'} | कक्षा: ${currentStudent.eligibleClass||currentStudent.lastClass||'--'} | PEN: ${currentStudent.pen||'--'} | ${currentStudent.lastSchool||'--'}`;
+  
+  selQ1 = ''; selQ2 = ''; selQ3 = ''; selQ4 = '';
+  document.querySelectorAll('.radio-opt').forEach(opt => opt.classList.remove('selected'));
+  document.getElementById('q2Group').classList.add('hidden');
+  document.getElementById('q3Group').classList.add('hidden');
+  document.getElementById('q4Group').classList.add('hidden');
+  document.getElementById('remarksInput').value = '';
+  document.getElementById('modalError').textContent = '';
+
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('show');
+  currentStudent = null;
+}
+
+document.querySelectorAll('#q1 .radio-opt').forEach(opt => {
+  opt.addEventListener('click', function() {
+    document.querySelectorAll('#q1 .radio-opt').forEach(o => o.classList.remove('selected'));
+    this.classList.add('selected');
+    selQ1 = this.dataset.value;
+
+    if (selQ1 === 'NotStudying') {
+      document.getElementById('q2Group').classList.remove('hidden');
+    } else {
+      document.getElementById('q2Group').classList.add('hidden');
+      document.getElementById('q3Group').classList.add('hidden');
+      document.getElementById('q4Group').classList.add('hidden');
+    }
+  });
+});
+
+document.querySelectorAll('#q2 .radio-opt').forEach(opt => {
+  opt.addEventListener('click', function() {
+    document.querySelectorAll('#q2 .radio-opt').forEach(o => o.classList.remove('selected'));
+    this.classList.add('selected');
+    selQ2 = this.dataset.value;
+
+    if (selQ2 === 'Yes') {
+      document.getElementById('q3Group').classList.remove('hidden');
+      document.getElementById('q4Group').classList.remove('hidden');
+    } else {
+      document.getElementById('q3Group').classList.add('hidden');
+      document.getElementById('q4Group').classList.add('hidden');
+    }
+  });
+});
+
+document.querySelectorAll('#q3 .radio-opt').forEach(opt => {
+  opt.addEventListener('click', function() {
+    document.querySelectorAll('#q3 .radio-opt').forEach(o => o.classList.remove('selected'));
+    this.classList.add('selected');
+    selQ3 = this.dataset.value;
+  });
+});
+
+document.querySelectorAll('#q4 .radio-opt').forEach(opt => {
+  opt.addEventListener('click', function() {
+    document.querySelectorAll('#q4 .radio-opt').forEach(o => o.classList.remove('selected'));
+    this.classList.add('selected');
+    selQ4 = this.dataset.value;
+  });
+});
+
+async function submitVerification() {
+  if (!currentStudent) return;
+  if (!selQ1) {
+    document.getElementById('modalError').textContent = 'कृपया स्थिति सेलेक्ट करें (पढ़ रहा है / नहीं पढ़ रहा है)';
+    return;
+  }
+  if (selQ1 === 'NotStudying' && selQ2 === 'Yes' && !selQ4) {
+    document.getElementById('modalError').textContent = 'कृपया प्रवेश की कक्षा (9 / 10 / 11 / 12) सेलेक्ट करें';
+    return;
+  }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-spinner"></span> सहेजा जा रहा है...';
+
+  const payload = {
+    pen: currentStudent.pen,
+    studentName: currentStudent.name,
+    district: currentStudent.district,
+    block: currentStudent.block,
+    lastSchool: currentStudent.lastSchool,
+    isStudying: selQ1,
+    wantsToStudy: selQ2,
+    studyMode: selQ3,
+    targetClass: selQ4, // Target class (9/10/11/12) saved to Col M
+    remarks: document.getElementById('remarksInput').value.trim()
+  };
+
+  try {
+    const res = await apiCall({ action: 'save', data: JSON.stringify(payload) });
+    if (res.success) {
+      currentStudent.status = 'Verified';
+      if (selQ4) currentStudent.eligibleClass = selQ4;
+      closeModal();
+      renderTable();
+    } else {
+      document.getElementById('modalError').textContent = 'सहेजने में विफल: ' + (res.message || res.error);
+    }
+  } catch(e) {
+    document.getElementById('modalError').textContent = 'त्रुटि: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'सहेजें';
+  }
+}
+
+async function resetAppCache() {
+  localStorage.clear();
+  sessionStorage.clear();
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  try {
+    await apiCall({ action: 'clearCache' });
+  } catch(e){}
+  location.reload(true);
+}
+
+function h(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+initDistricts();
+</script>
+</body>
+</html>
