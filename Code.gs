@@ -298,10 +298,10 @@ function saveVerification(data) {
     var ts = Utilities.formatDate(new Date(), tz, 'dd/MM/yyyy HH:mm');
 
     // Save target admission class into Column M (Col 13 = Eligible Class to Import)
-    var targetCls = data.targetClass || data.admClass || data.eligibleClass;
-    if (targetCls) {
-      sheet.getRange(targetRow, 13).setValue(String(targetCls).trim());
-    }
+    // ONLY set if student is Not Studying AND willing to study! Clear/blank for all others.
+    var isWilling = (data.currentStatus === 'Not Studying' || data.isStudying === 'NotStudying') && (data.willing === 'Yes' || data.wantsToStudy === 'Yes');
+    var targetCls = isWilling ? (data.targetClass || data.admClass || data.eligibleClass || '') : '';
+    sheet.getRange(targetRow, 13).setValue(targetCls ? String(targetCls).trim() : '');
 
     // Single batch write for Cols Q & R (Cols 17 & 18 = Verified Yes & Timestamp)
     sheet.getRange(targetRow, 17, 1, 2).setValues([['Yes', ts]]);
