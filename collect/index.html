@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Out-of-School Student: Field Data Collection (v1.36)</title>
+  <title>Field Data Collection (v1.37)</title>
   <style>
     :root {
       --navy: #1c3866; --navy-dark: #142845; --green: #16a34a; --red: #dc2626;
@@ -64,7 +64,6 @@
     .table-wrap { overflow-x: auto; max-height: 65vh; overflow-y: auto; }
 
     .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600; }
-    .badge-v136 { background: #4361ee; color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; margin-left: 6px; }
     .badge-studying { background: rgba(22,163,74,0.12); color: #15803d; }
     .badge-notstudying { background: rgba(234,88,12,0.12); color: #c2410c; }
     .badge-deceased { background: rgba(220,38,38,0.12); color: #b91c1c; }
@@ -106,18 +105,52 @@
       border-radius: 50%; animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Save Loader & Success Modal Overlays */
+    .popup-overlay {
+      position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(3px);
+      display: flex; align-items: center; justify-content: center; z-index: 200; padding: 16px;
+    }
+    .popup-card {
+      background: #ffffff; border-radius: 14px; padding: 28px 24px; text-align: center;
+      width: 100%; max-width: 360px; box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+      animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .spinner-large {
+      width: 46px; height: 46px; border: 4px solid #e2e8f0; border-top-color: var(--navy);
+      border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+    }
+    .success-icon-wrap {
+      width: 56px; height: 56px; background: rgba(22, 163, 74, 0.12); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;
+    }
+    .checkmark-svg { width: 36px; height: 36px; stroke-width: 3; stroke: #16a34a; stroke-linecap: round; stroke-linejoin: round; }
+    .checkmark-circle { stroke: #16a34a; stroke-width: 3; stroke-dasharray: 166; stroke-dashoffset: 166; animation: stroke 0.4s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
+    .checkmark-check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.3s forwards; }
+    @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+    .popup-card h3 { font-size: 1.15rem; color: var(--navy); margin-bottom: 6px; font-weight: 700; }
+    .popup-card p { font-size: 0.88rem; color: var(--muted); margin-bottom: 20px; line-height: 1.4; }
+    .popup-btn {
+      width: 100%; padding: 10px 16px; font-weight: 600; background: var(--green); color: #fff;
+      border: none; border-radius: 8px; font-size: 0.9rem; cursor: pointer; transition: background 0.15s;
+    }
+    .popup-btn:hover { background: #15803d; }
   </style>
 </head>
 <body>
 
   <div id="loadingOverlay">
     <div class="spinner"></div>
-    <div id="loadingText">Loading student list…</div>
+    <div id="loadingText">Loading student list (one-time load, then instant)…</div>
   </div>
 
   <div class="page-header">
     <h1>Out-of-School Student: Field Data Collection</h1>
-    <p class="sub">District चुनें, फिर list में से student का status भरें। <span class="badge-v136" style="background:#1c3866;color:#fff;font-size:0.75rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">Version: v1.36</span></p>
+    <p class="sub">District चुनें, फिर list में से student का status भरें। <span class="badge-v136" style="background:#1c3866;color:#fff;font-size:0.75rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;">Version: v1.37</span></p>
   </div>
 
   <div class="card">
@@ -126,7 +159,6 @@
         <label>Your Name / Designation (Collected By)</label>
         <input type="text" id="collectedBy" placeholder="e.g. Ramesh Kumar, CRC Nakur">
       </div>
-      <button type="button" class="secondary" onclick="resetAppCache()" style="align-self:flex-end;">🔄 Reset Cache &amp; Fresh Reload</button>
     </div>
   </div>
 
@@ -134,21 +166,23 @@
     <div class="filters">
       <div class="field">
         <label>District *</label>
-        <select id="districtSelect" onchange="onDistrictChange()"><option value="">Loading...</option></select>
+        <select id="districtSelect"><option value="">Loading...</option></select>
       </div>
       <div class="field">
         <label>School *</label>
-        <select id="schoolSelect" disabled onchange="onSchoolChange()"><option value="">Select district first...</option></select>
+        <select id="schoolSelect" disabled><option value="">Select district first...</option></select>
       </div>
-      <div class="field">
-        <label>🔍 Direct Search (UDISE / School / Student / PEN)</label>
-        <input type="text" id="searchInput" placeholder="Type UDISE Code, School, or Student Name..." oninput="onSearchInput()">
+      <div class="field" style="min-width: 240px;">
+        <label>🔍 Direct Search (UDISE Code / School / Student / PEN)</label>
+        <input type="text" id="quickSearchInput" placeholder="Type UDISE Code, School, or Student Name..." disabled>
       </div>
     </div>
-    <div style="margin-top:10px;">
-      <label style="font-size:0.8rem;font-weight:600;cursor:pointer;user-select:none;">
-        <input type="checkbox" id="chkHideVerified" checked onchange="renderTable()"> <span>सत्यापित छात्रों को छिपाएँ (Hide Verified Students)</span>
+    <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;">
+      <label style="display: inline-flex; align-items: center; gap: 7px; font-size: 0.84rem; font-weight: 600; cursor: pointer; user-select: none;">
+        <input type="checkbox" id="chkHideCompleted" checked style="width: 17px; height: 17px; accent-color: var(--navy); cursor: pointer;">
+        <span>केवल शेष (Not Recorded) छात्र दिखाएँ &bull; पूर्ण हो चुके छात्र व विद्यालय छिपाएँ</span>
       </label>
+      <div id="filterCounts" style="font-size: 0.78rem; color: var(--muted); font-weight: 600;"></div>
     </div>
     <div id="status"></div>
   </div>
@@ -174,7 +208,6 @@
     </div>
   </div>
 
-  <!-- Verification Modal -->
   <div id="overlay">
     <div id="modal">
       <h2 id="modalName"></h2>
@@ -184,12 +217,11 @@
         <label class="qlabel">क्या छात्र वर्तमान में पढ़ रहा है?</label>
         <div class="radio-row" id="q1">
           <div class="radio-opt" data-value="Studying">पढ़ रहा है</div>
-          <div class="radio-opt" data-value="NotStudying">नहीं पढ़ रहा है</div>
-          <div class="radio-opt" data-value="Deceased">दिवंगत</div>
+          <div class="radio-opt" data-value="Not Studying">नहीं पढ़ रहा है</div>
         </div>
       </div>
 
-      <div class="q-group hidden" id="q2Group">
+      <div class="q-group hidden" id="q2group">
         <label class="qlabel">क्या छात्र आगे पढ़ने के लिए इच्छुक है?</label>
         <div class="radio-row" id="q2">
           <div class="radio-opt" data-value="Yes">हाँ</div>
@@ -197,7 +229,7 @@
         </div>
       </div>
 
-      <div class="q-group hidden" id="q3Group">
+      <div class="q-group hidden" id="q3group">
         <label class="qlabel">अध्ययन का माध्यम</label>
         <div class="radio-row" id="q3">
           <div class="radio-opt" data-value="Regular">नियमित विद्यालय (Regular)</div>
@@ -205,10 +237,9 @@
         </div>
       </div>
 
-      <!-- New Class Selection Question (Saves into Column M = Eligible Class to Import) -->
-      <div class="q-group hidden" id="q4Group">
+      <div class="q-group hidden" id="targetClassGroup">
         <label class="qlabel">किस कक्षा में प्रवेश लेना चाहते हैं? *</label>
-        <div class="radio-row" id="q4">
+        <div class="radio-row" id="targetClassRadios">
           <div class="radio-opt" data-value="9">कक्षा 9</div>
           <div class="radio-opt" data-value="10">कक्षा 10</div>
           <div class="radio-opt" data-value="11">कक्षा 11</div>
@@ -216,304 +247,779 @@
         </div>
       </div>
 
+      <div class="q-group hidden" id="q4group">
+        <label class="qlabel">न पढ़ने का कारण</label>
+        <select id="reasonSelect">
+          <option value="">कारण चुनें...</option>
+          <option value="Marriage">विवाह</option>
+          <option value="Migrated for Labour/Work">मजदूरी/काम के लिए पलायन</option>
+          <option value="Financial Problem">आर्थिक समस्या</option>
+          <option value="Household / Domestic Responsibility">घरेलू जिम्मेदारी</option>
+          <option value="Health / Medical Reason">स्वास्थ्य/चिकित्सा कारण</option>
+          <option value="Admission Not Taken / TC Issue">प्रवेश नहीं लिया / टीसी समस्या</option>
+          <option value="Not Interested">रुचि नहीं है</option>
+          <option value="Death">मृत्यु हो गई</option>
+          <option value="Other">अन्य</option>
+        </select>
+      </div>
+
       <div class="q-group">
         <label class="qlabel">टिप्पणी (वैकल्पिक)</label>
-        <textarea id="remarksInput" rows="2" placeholder="कोई अतिरिक्त जानकारी..."></textarea>
+        <textarea id="remarksBox" rows="2"></textarea>
       </div>
 
       <div id="modalError"></div>
-
       <div class="modal-actions">
-        <button type="button" class="secondary" onclick="closeModal()">रद्द करें</button>
-        <button type="button" id="saveBtn" onclick="submitVerification()">सहेजें</button>
+        <button class="secondary" onclick="closeModal()">रद्द करें</button>
+        <button onclick="saveEntry()" id="saveBtn">सहेजें</button>
       </div>
     </div>
   </div>
 
+  <!-- Saving Loader Screen Overlay -->
+  <div id="saveLoaderOverlay" class="popup-overlay hidden">
+    <div class="popup-card">
+      <div class="spinner-large"></div>
+      <h3 id="saveLoaderTitle">सहेजा जा रहा है...</h3>
+      <p id="saveLoaderSub">कृपया प्रतीक्षा करें, Google Sheets में डाटा अपडेट हो रहा है</p>
+    </div>
+  </div>
+
+  <!-- Success Popup Modal Overlay -->
+  <div id="successPopupOverlay" class="popup-overlay hidden">
+    <div class="popup-card">
+      <div class="success-icon-wrap">
+        <svg class="checkmark-svg" viewBox="0 0 52 52">
+          <circle class="checkmark-circle" cx="26" cy="26" r="23" fill="none"/>
+          <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+      </div>
+      <h3 id="successPopupTitle">सफलतापूर्वक सहेजा गया!</h3>
+      <p id="successPopupMsg">छात्र का स्टेटस सफलता के साथ अपडेट कर दिया गया है।</p>
+      <button class="popup-btn" onclick="closeSuccessPopup()">ठीक है (OK)</button>
+    </div>
+  </div>
+
   <footer style="text-align:center;padding:16px;font-size:0.75rem;color:var(--muted);border-top:1px solid var(--border);margin-top:20px;">
-    <div>Field Data Collection Portal &bull; System Version: v1.36 (Build 36)</div>
+    <div>Field Data Collection Portal &bull; System Version: v1.37 (Build 36)</div>
   </footer>
 
-<script>
-'use strict';
-const API = 'https://script.google.com/macros/s/AKfycbwRLG-w3IikBua37lag-yM085PR33lWQ26MxLGAHS8SI4X3XhiHzJTXUac6nsQCHq48/exec';
+  <script>
+    // Bump if the Apps Script deployment is ever recreated (new deployment
+    // = new URL). This page's own URL (ooss.dataimpact.in/collect/) never
+    // changes for field coordinators even if this does.
+    const API_URL = 'https://script.google.com/macros/s/AKfycby0_iWF3jfCwhFoQ68BZ0QGZqBNyx5AlleumYndNu3-8dU7rbliv01tX3qN_dO_yEHCdg/exec';
 
-let allStudents = [];
-let filteredStudents = [];
-let currentStudent = null;
+    let districtCache = {};         // district -> array of student records
+    let currentDistrictStudents = []; // all students for selected district
+    let currentStudents = [];       // filtered view for current school selection
+    let activeStudent = null;
+    let answers = { currentStatus: '', willing: '', mode: '', targetClass: '', reason: '' };
 
-let selQ1 = '';
-let selQ2 = '';
-let selQ3 = '';
-let selQ4 = '';
+    function setStatus(msg, cls) {
+      const el = document.getElementById('status');
+      el.textContent = msg || '';
+      el.className = cls || '';
+    }
 
-async function apiCall(params) {
-  const url = new URL(API);
-  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
-  const r = await fetch(url);
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  const j = await r.json();
-  if (j && j.error) throw new Error(j.error);
-  return j;
-}
+    // Pending Queue for offline/failed submissions
+    function getPendingQueue() {
+      try {
+        return JSON.parse(localStorage.getItem('pending_submissions') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
 
-async function initDistricts() {
-  const sel = document.getElementById('districtSelect');
-  try {
-    const cached = localStorage.getItem('ooss_dists_v5');
-    if (cached) {
-      populateDistricts(JSON.parse(cached));
+    function savePendingQueue(queue) {
+      try {
+        localStorage.setItem('pending_submissions', JSON.stringify(queue));
+      } catch (e) {}
+    }
+
+    function enqueuePendingSubmission(payload) {
+      const queue = getPendingQueue();
+      const existingIdx = queue.findIndex(item => item.pen === payload.pen);
+      if (existingIdx >= 0) {
+        queue[existingIdx] = payload;
+      } else {
+        queue.push(payload);
+      }
+      savePendingQueue(queue);
+      updatePendingBadge();
+    }
+
+    function updatePendingBadge() {
+      const queue = getPendingQueue();
+      const badgeEl = document.getElementById('pendingBadge');
+      if (badgeEl) {
+        if (queue.length > 0) {
+          badgeEl.textContent = ` (${queue.length} un-synced entries saved locally)`;
+          badgeEl.style.display = 'inline-block';
+        } else {
+          badgeEl.style.display = 'none';
+        }
+      }
+    }
+
+    let isSyncingPending = false;
+    async function syncPendingSubmissions() {
+      if (isSyncingPending) return;
+      const queue = getPendingQueue();
+      if (!queue.length) return;
+
+      isSyncingPending = true;
+      const remaining = [];
+      for (const payload of queue) {
+        try {
+          await apiPost('submit', payload);
+        } catch (e) {
+          remaining.push(payload);
+        }
+      }
+      savePendingQueue(remaining);
+      updatePendingBadge();
+      isSyncingPending = false;
+    }
+
+    setInterval(syncPendingSubmissions, 15000);
+
+    // Apps Script Web Apps occasionally return an HTML "access denied"/
+    // sign-in interstitial instead of JSON for no clear reason — a retry
+    // almost always succeeds. Wrap every call in a few retries with a
+    // short backoff before actually surfacing an error to the user.
+    async function fetchJsonWithRetry(url, options, retries) {
+      retries = retries === undefined ? 2 : retries;
+      let lastErr;
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+          const res = await fetch(url, options);
+          const text = await res.text();
+          let body;
+          try {
+            body = JSON.parse(text);
+          } catch (e) {
+            throw new Error('Server returned auth HTML page (Permission error)');
+          }
+          if (!body.ok) throw new Error(body.error || 'Request failed');
+          return body;
+        } catch (err) {
+          lastErr = err;
+          if (attempt < retries) await new Promise(r => setTimeout(r, 400 * Math.pow(2, attempt)));
+        }
+      }
+      throw lastErr;
+    }
+
+    async function apiPost(action, payload) {
+      return fetchJsonWithRetry(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // avoids CORS preflight
+        body: JSON.stringify({ action, payload }),
+      });
+    }
+
+    const ALL_DISTRICTS = [
+      "AGRA", "ALIGARH", "AMBEDKAR NAGAR", "AMETHI - CSM NAGAR", "AURAIYA", "AZAMGARH",
+      "BAGHPAT", "BAHRAICH", "BALLIA", "BALRAMPUR", "BANDA", "BARABANKI", "BAREILLY",
+      "BASTI", "BHADOI", "BIJNOR", "BUDAUN", "BULANDSHAHR", "CHANDAULI", "CHITRAKOOT",
+      "DEORIA", "ETAH", "ETAWAH", "FAIZABAD", "FARRUKHABAD", "FATEHPUR", "FIROZABAD",
+      "GAUTAM BUDDHA NAGAR", "GHAZIABAD", "GHAZIPUR", "GONDA", "GORAKHPUR",
+      "HAMIRPUR (U.P.)", "HAPUR (PANCHSHEEL NAGAR)", "HARDOI", "HATHRAS", "JALAUN",
+      "JAUNPUR", "JHANSI", "JYOTIBA PHULE NAGAR (AMROHA)", "KANNAUJ", "KANPUR DEHAT",
+      "KANPUR NAGAR", "KASGANJ", "KAUSHAMBI", "KHERI", "KUSHINAGAR", "LALITPUR",
+      "LUCKNOW", "MAHARAJGANJ", "MAHOBA", "MAINPURI", "MATHURA", "MAU", "MEERUT",
+      "MIRZAPUR", "MORADABAD", "MUZAFFARNAGAR", "PILIBHIT", "PRATAPGARH", "PRAYAGRAJ",
+      "RAE BARELI", "RAMPUR", "SAHARANPUR", "SAMBHAL (BHIM NAGAR)", "SANT KABIR NAGAR",
+      "SHAHJAHANPUR", "SHAMLI (PRABUDH NAGAR)", "SHRAWASTI", "SIDDHARTHNAGAR",
+      "SITAPUR", "SONBHADRA", "SULTANPUR", "UNNAO", "VARANASI"
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('districtSelect').innerHTML =
+        '<option value="">Select district...</option>' +
+        ALL_DISTRICTS.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+
       document.getElementById('loadingOverlay').style.display = 'none';
-      return;
+
+      fetchJsonWithRetry(API_URL + '?action=districts').then(body => {
+        if (body.ok && Array.isArray(body.data) && body.data.length > 0) {
+          const sel = document.getElementById('districtSelect');
+          const currentVal = sel.value;
+          sel.innerHTML =
+            '<option value="">Select district...</option>' +
+            body.data.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+          if (currentVal) sel.value = currentVal;
+        }
+      }).catch(() => {});
+    });
+
+    let districtDataCache = {};  // district -> array of all student objects in district
+    let currentRequestToken = 0;
+
+    function applyPendingQueueToStudents(studentsList) {
+      if (!Array.isArray(studentsList) || studentsList.length === 0) return;
+      const queue = getPendingQueue();
+      if (!queue || queue.length === 0) return;
+
+      const queueMap = new Map();
+      queue.forEach(item => {
+        if (item.pen) queueMap.set(String(item.pen).trim(), item);
+      });
+
+      studentsList.forEach(s => {
+        const penStr = String(s.pen || '').trim();
+        if (queueMap.has(penStr)) {
+          const pending = queueMap.get(penStr);
+          s.currentStatus = pending.currentStatus || s.currentStatus || '';
+          s.willing = pending.willing || s.willing || '';
+          s.mode = pending.mode || s.mode || '';
+          s.targetClass = pending.targetClass || s.targetClass || '';
+          if (pending.eligibleClass) s.eligibleClass = pending.eligibleClass;
+          s.reason = pending.reason || s.reason || '';
+        }
+      });
     }
-  } catch(e){}
 
-  try {
-    const dists = await apiCall({ action: 'getDistricts' });
-    populateDistricts(dists);
-    try { localStorage.setItem('ooss_dists_v5', JSON.stringify(dists)); } catch(e){}
-  } catch(e) {
-    sel.innerHTML = '<option value="">Error loading districts</option>';
-  } finally {
-    document.getElementById('loadingOverlay').style.display = 'none';
-  }
-}
+    async function loadDistrictData(district) {
+      if (districtDataCache[district]) {
+        applyPendingQueueToStudents(districtDataCache[district]);
+        return districtDataCache[district];
+      }
 
-function populateDistricts(dists) {
-  const sel = document.getElementById('districtSelect');
-  sel.innerHTML = '<option value="">Select District...</option>' + (dists||[]).map(d => `<option value="${d}">${d}</option>`).join('');
-  sel.disabled = false;
-}
+      let students = [];
 
-async function onDistrictChange() {
-  const d = document.getElementById('districtSelect').value;
-  const sSel = document.getElementById('schoolSelect');
-  sSel.innerHTML = '<option value="">Loading schools...</option>';
-  sSel.disabled = true;
-  if (!d) return;
+      // 1. Fetch live student list from Apps Script API (contains live status from Field Data Collection sheet)
+      try {
+        const body = await fetchJsonWithRetry(API_URL + '?action=students&district=' + encodeURIComponent(district));
+        if (body && body.ok && Array.isArray(body.data) && body.data.length > 0) {
+          students = body.data;
+        }
+      } catch (e) {
+        console.warn('Apps Script API fetch error, trying static CDN file fallback:', e);
+      }
 
-  const cacheKey = 'ooss_sch_' + d;
-  try {
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      populateSchools(JSON.parse(cached));
-      return;
+      // 2. Fallback to static CDN file if Apps Script API fetch fails/offline
+      if (!students || students.length === 0) {
+        try {
+          const res = await fetch(`data/${encodeURIComponent(district)}.json`);
+          if (res.ok) {
+            students = await res.json();
+          }
+        } catch (e) {
+          console.error('Static CDN fetch error:', e);
+        }
+      }
+
+      // 3. Apply any un-synced entries saved locally in browser storage queue
+      applyPendingQueueToStudents(students);
+
+      if (students && students.length > 0) {
+        districtDataCache[district] = students;
+      }
+      return students;
     }
-  } catch(e){}
 
-  try {
-    const schools = await apiCall({ action: 'getSchools', district: d });
-    populateSchools(schools);
-    try { localStorage.setItem(cacheKey, JSON.stringify(schools)); } catch(e){}
-  } catch(e) {
-    sSel.innerHTML = '<option value="">Error loading schools</option>';
-  }
-}
+    let displayedStudents = [];
 
-function populateSchools(schools) {
-  const sSel = document.getElementById('schoolSelect');
-  sSel.innerHTML = '<option value="">-- All Schools in District --</option>' + (schools||[]).map(s => `<option value="${s}">${s}</option>`).join('');
-  sSel.disabled = false;
-  loadStudents();
-}
-
-async function onSchoolChange() {
-  loadStudents();
-}
-
-async function loadStudents() {
-  const d = document.getElementById('districtSelect').value;
-  const s = document.getElementById('schoolSelect').value;
-  if (!d) return;
-
-  document.getElementById('loadingOverlay').style.display = 'flex';
-  try {
-    const res = await apiCall({ action: 'getStudents', district: d, school: s });
-    allStudents = res.students || [];
-    renderTable();
-  } catch(e) {
-    document.getElementById('tbody').innerHTML = `<tr><td colspan="12" style="color:var(--red);padding:20px;text-align:center;">Failed to load: ${e.message}</td></tr>`;
-  } finally {
-    document.getElementById('loadingOverlay').style.display = 'none';
-  }
-}
-
-function onSearchInput() {
-  renderTable();
-}
-
-function renderTable() {
-  const q = document.getElementById('searchInput').value.toLowerCase().trim();
-  const hideVer = document.getElementById('chkHideVerified').checked;
-
-  filteredStudents = allStudents.filter(st => {
-    if (hideVer && st.status !== 'Pending') return false;
-    if (!q) return true;
-    return (st.name||'').toLowerCase().includes(q) ||
-           (st.pen||'').toLowerCase().includes(q) ||
-           (st.fatherName||'').toLowerCase().includes(q) ||
-           (st.lastSchool||'').toLowerCase().includes(q);
-  });
-
-  const tbody = document.getElementById('tbody');
-  if (!filteredStudents.length) {
-    tbody.innerHTML = '<tr><td colspan="12" style="color:var(--muted);padding:20px;text-align:center;">No matching students found.</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = filteredStudents.map((st, idx) => {
-    const isVer = st.status === 'Verified' || st.status === 'Admitted';
-    const btnText = isVer ? '✓ Updated' : 'वर्तमान स्थिति';
-    const btnClass = isVer ? 'secondary' : '';
-    return `<tr>
-      <td>${h(st.block)}</td>
-      <td>--</td>
-      <td class="col-school">${h(st.lastSchool)}</td>
-      <td><strong>${h(st.pen)}</strong></td>
-      <td><strong>${h(st.name)}</strong></td>
-      <td>${h(st.gender)}</td>
-      <td>${h(st.mobile)}</td>
-      <td>${h(st.motherName)}</td>
-      <td>${h(st.fatherName)}</td>
-      <td>${h(st.eligibleClass||st.lastClass||'--')}</td>
-      <td><span class="badge ${isVer?'badge-studying':'badge-none'}">${h(st.status)}</span></td>
-      <td><button type="button" class="${btnClass}" onclick="openModal(${idx})">${btnText}</button></td>
-    </tr>`;
-  }).join('');
-}
-
-function openModal(idx) {
-  currentStudent = filteredStudents[idx];
-  if (!currentStudent) return;
-
-  document.getElementById('modalName').textContent = currentStudent.name || 'Student Detail';
-  document.getElementById('modalMeta').textContent = `पिता: ${currentStudent.fatherName||'--'} | कक्षा: ${currentStudent.eligibleClass||currentStudent.lastClass||'--'} | PEN: ${currentStudent.pen||'--'} | ${currentStudent.lastSchool||'--'}`;
-  
-  selQ1 = ''; selQ2 = ''; selQ3 = ''; selQ4 = '';
-  document.querySelectorAll('.radio-opt').forEach(opt => opt.classList.remove('selected'));
-  document.getElementById('q2Group').classList.add('hidden');
-  document.getElementById('q3Group').classList.add('hidden');
-  document.getElementById('q4Group').classList.add('hidden');
-  document.getElementById('remarksInput').value = '';
-  document.getElementById('modalError').textContent = '';
-
-  document.getElementById('overlay').classList.add('show');
-}
-
-function closeModal() {
-  document.getElementById('overlay').classList.remove('show');
-  currentStudent = null;
-}
-
-document.querySelectorAll('#q1 .radio-opt').forEach(opt => {
-  opt.addEventListener('click', function() {
-    document.querySelectorAll('#q1 .radio-opt').forEach(o => o.classList.remove('selected'));
-    this.classList.add('selected');
-    selQ1 = this.dataset.value;
-
-    if (selQ1 === 'NotStudying') {
-      document.getElementById('q2Group').classList.remove('hidden');
-    } else {
-      document.getElementById('q2Group').classList.add('hidden');
-      document.getElementById('q3Group').classList.add('hidden');
-      document.getElementById('q4Group').classList.add('hidden');
+    function isStudentRecorded(s) {
+      if (!s) return false;
+      const st = (s.currentStatus || '').trim();
+      const r = (s.reason || '').trim();
+      if (r === 'Death') return true;
+      if (st === 'Studying' || st === 'Not Studying' || st === 'Verified' || st === 'Admitted') {
+        return true;
+      }
+      return false;
     }
-  });
-});
 
-document.querySelectorAll('#q2 .radio-opt').forEach(opt => {
-  opt.addEventListener('click', function() {
-    document.querySelectorAll('#q2 .radio-opt').forEach(o => o.classList.remove('selected'));
-    this.classList.add('selected');
-    selQ2 = this.dataset.value;
-
-    if (selQ2 === 'Yes') {
-      document.getElementById('q3Group').classList.remove('hidden');
-      document.getElementById('q4Group').classList.remove('hidden');
-    } else {
-      document.getElementById('q3Group').classList.add('hidden');
-      document.getElementById('q4Group').classList.add('hidden');
+    function updateCountsDisplay() {
+      const filterCounts = document.getElementById('filterCounts');
+      if (!filterCounts) return;
+      const district = document.getElementById('districtSelect').value;
+      if (!district || !districtDataCache[district]) {
+        filterCounts.innerHTML = '';
+        return;
+      }
+      const all = districtDataCache[district];
+      const total = all.length;
+      const pending = all.filter(s => !isStudentRecorded(s)).length;
+      const completed = total - pending;
+      const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+      filterCounts.innerHTML = `<span style="color:var(--orange);">शेष (Not Recorded): <strong>${pending}</strong></span> &bull; <span style="color:var(--green);">पूर्ण: <strong>${completed}</strong> (${pct}%)</span> &bull; कुल: <strong>${total}</strong>`;
     }
-  });
-});
 
-document.querySelectorAll('#q3 .radio-opt').forEach(opt => {
-  opt.addEventListener('click', function() {
-    document.querySelectorAll('#q3 .radio-opt').forEach(o => o.classList.remove('selected'));
-    this.classList.add('selected');
-    selQ3 = this.dataset.value;
-  });
-});
+    function updateSchoolDropdown(district, selectedSchoolToKeep = null) {
+      if (!district || !districtDataCache[district]) return;
+      const students = districtDataCache[district];
+      const hideCompleted = document.getElementById('chkHideCompleted')?.checked;
+      const schoolSel = document.getElementById('schoolSelect');
 
-document.querySelectorAll('#q4 .radio-opt').forEach(opt => {
-  opt.addEventListener('click', function() {
-    document.querySelectorAll('#q4 .radio-opt').forEach(o => o.classList.remove('selected'));
-    this.classList.add('selected');
-    selQ4 = this.dataset.value;
-  });
-});
+      // Compute stats per school
+      const schoolMap = new Map();
+      students.forEach(s => {
+        const schoolName = (s.school || '').trim();
+        const udiseCode = (s.udise || '').trim();
+        const blockName = (s.block || '').trim();
+        if (!schoolName) return;
+        const key = udiseCode || schoolName;
+        if (!schoolMap.has(key)) {
+          schoolMap.set(key, { udise: udiseCode, school: schoolName, block: blockName, total: 0, pending: 0 });
+        }
+        const item = schoolMap.get(key);
+        item.total++;
+        if (!isStudentRecorded(s)) {
+          item.pending++;
+        }
+      });
 
-async function submitVerification() {
-  if (!currentStudent) return;
-  if (!selQ1) {
-    document.getElementById('modalError').textContent = 'कृपया स्थिति सेलेक्ट करें (पढ़ रहा है / नहीं पढ़ रहा है)';
-    return;
-  }
-  if (selQ1 === 'NotStudying' && selQ2 === 'Yes' && !selQ4) {
-    document.getElementById('modalError').textContent = 'कृपया प्रवेश की कक्षा (9 / 10 / 11 / 12) सेलेक्ट करें';
-    return;
-  }
+      const allSchools = Array.from(schoolMap.values()).sort((a, b) => a.school.localeCompare(b.school));
+      const totalPendingInDistrict = students.filter(s => !isStudentRecorded(s)).length;
+      const totalInDistrict = students.length;
 
-  const btn = document.getElementById('saveBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="btn-spinner"></span> सहेजा जा रहा है...';
+      // Filter visible schools (exclude schools where all students are marked if hideCompleted is checked)
+      const visibleSchools = hideCompleted
+        ? allSchools.filter(s => s.pending > 0)
+        : allSchools;
 
-  const payload = {
-    pen: currentStudent.pen,
-    studentName: currentStudent.name,
-    district: currentStudent.district,
-    block: currentStudent.block,
-    lastSchool: currentStudent.lastSchool,
-    isStudying: selQ1,
-    wantsToStudy: selQ2,
-    studyMode: selQ3,
-    targetClass: selQ4, // Target class (9/10/11/12) saved to Col M
-    remarks: document.getElementById('remarksInput').value.trim()
-  };
+      const currentVal = selectedSchoolToKeep !== null ? selectedSchoolToKeep : schoolSel.value;
 
-  try {
-    const res = await apiCall({ action: 'save', data: JSON.stringify(payload) });
-    if (res.success) {
-      currentStudent.status = 'Verified';
-      if (selQ4) currentStudent.eligibleClass = selQ4;
+      if (visibleSchools.length === 0) {
+        if (totalPendingInDistrict === 0) {
+          schoolSel.innerHTML = '<option value="">-- 🎉 All schools completed in district! --</option>';
+          setStatus(`🎉 बधाई! ${escapeHtml(district)} जनपद के सभी ${totalInDistrict} छात्रों का विवरण पूर्ण हो चुका है। कोई छात्र शेष नहीं है।`, 'success');
+        } else {
+          schoolSel.innerHTML = '<option value="">No schools with pending students</option>';
+        }
+        schoolSel.disabled = true;
+        updateCountsDisplay();
+        return;
+      }
+
+      let opts = '<option value="">Select school...</option>';
+      if (hideCompleted) {
+        opts += `<option value="__ALL__">-- All schools in district (${totalPendingInDistrict} शेष छात्र) --</option>`;
+      } else {
+        opts += `<option value="__ALL__">-- All schools in district (${totalPendingInDistrict}/${totalInDistrict} शेष छात्र) --</option>`;
+      }
+
+      visibleSchools.forEach(s => {
+        const label = s.udise ? `${escapeHtml(s.udise)} — ${escapeHtml(s.school)}` : escapeHtml(s.school);
+        const countInfo = hideCompleted ? ` (${s.pending} शेष)` : ` (${s.pending}/${s.total} शेष)`;
+        const blockInfo = s.block ? ` [${escapeHtml(s.block)}]` : '';
+        opts += `<option value="${escapeHtml(s.udise || s.school)}">${label}${countInfo}${blockInfo}</option>`;
+      });
+
+      schoolSel.innerHTML = opts;
+      schoolSel.disabled = false;
+
+      // Maintain selection if still visible
+      const isStillVisible = visibleSchools.some(s => (s.udise || s.school) === currentVal) || currentVal === '__ALL__';
+      if (currentVal && isStillVisible) {
+        schoolSel.value = currentVal;
+      } else if (currentVal && !isStillVisible && currentVal !== '') {
+        // School was fully completed and is now hidden!
+        schoolSel.value = '';
+        currentStudents = [];
+        renderTablePrompt('✓ इस विद्यालय के सभी छात्र पूर्ण हो चुके हैं और यह विद्यालय सूची से छिपा दिया गया है। कृपया अगला विद्यालय चुनें।');
+        setStatus('✓ चयनित विद्यालय के सभी छात्र पूर्ण हो चुके हैं। सूची से विद्यालय हटा दिया गया है।', 'success');
+      }
+
+      updateCountsDisplay();
+    }
+
+    document.getElementById('districtSelect').addEventListener('change', async function () {
+      const district = this.value;
+      const schoolSel = document.getElementById('schoolSelect');
+      const searchInput = document.getElementById('quickSearchInput');
+
+      schoolSel.disabled = true;
+      schoolSel.innerHTML = '<option value="">Select school...</option>';
+      searchInput.disabled = true;
+      searchInput.value = '';
+
+      currentStudents = [];
+      renderTablePrompt('District selected. Please select a school or type UDISE Code/Name above.');
+
+      if (!district) {
+        setStatus('', '');
+        updateCountsDisplay();
+        return;
+      }
+
+      const requestToken = ++currentRequestToken;
+      setStatus(`Loading schools list for ${district}...`, 'loading');
+
+      try {
+        const students = await loadDistrictData(district);
+
+        if (requestToken !== currentRequestToken) return;
+
+        updateSchoolDropdown(district);
+        searchInput.disabled = false;
+
+        const hideCompleted = document.getElementById('chkHideCompleted')?.checked;
+        const pendingCount = students.filter(s => !isStudentRecorded(s)).length;
+        if (hideCompleted) {
+          setStatus(`${pendingCount} छात्र शेष (Not Recorded) हैं। विद्यालय चुनें या सीधे खोजें।`, '');
+        } else {
+          setStatus(`${students.length} कुल छात्र मिले (${pendingCount} शेष)। विद्यालय चुनें या खोजें।`, '');
+        }
+      } catch (err) {
+        if (requestToken !== currentRequestToken) return;
+        setStatus(`Failed to load schools list for ${district}: ${err.message || err}`, 'error');
+      }
+    });
+
+    document.getElementById('schoolSelect').addEventListener('change', async function () {
+      const district = document.getElementById('districtSelect').value;
+      const schoolVal = this.value;
+      document.getElementById('quickSearchInput').value = '';
+
+      if (!district || !schoolVal) {
+        currentStudents = [];
+        renderTablePrompt('Please select a school to view student list.');
+        setStatus('', '');
+        return;
+      }
+
+      const requestToken = ++currentRequestToken;
+      const selectedOptionText = this.options[this.selectedIndex]?.text || schoolVal;
+
+      setStatus(`Loading student list for ${selectedOptionText}...`, 'loading');
+
+      try {
+        const allDistrictStudents = await loadDistrictData(district);
+
+        if (requestToken !== currentRequestToken) return;
+
+        if (schoolVal === '__ALL__') {
+          currentStudents = allDistrictStudents;
+        } else {
+          currentStudents = allDistrictStudents.filter(s =>
+            (s.udise && s.udise === schoolVal) || s.school === schoolVal
+          );
+        }
+
+        renderTable(currentStudents);
+        const visibleCount = displayedStudents.length;
+        const hideCompleted = document.getElementById('chkHideCompleted')?.checked;
+        if (hideCompleted) {
+          setStatus(`${visibleCount} शेष (Not Recorded) छात्र मिले for ${selectedOptionText}.`, '');
+        } else {
+          setStatus(`${currentStudents.length} छात्र मिले for ${selectedOptionText}.`, '');
+        }
+      } catch (err) {
+        if (requestToken !== currentRequestToken) return;
+        renderTableError(`Failed to load student list: ${err.message || err}`, district, schoolVal);
+        setStatus('Error loading student list.', 'error');
+      }
+    });
+
+    // Real-time quick filter / search handler (UDISE Code / School / Student / PEN)
+    document.getElementById('quickSearchInput').addEventListener('input', function () {
+      const term = this.value.trim().toLowerCase();
+      const district = document.getElementById('districtSelect').value;
+      const schoolSel = document.getElementById('schoolSelect');
+
+      if (!district || !districtDataCache[district]) return;
+      const allDistrictStudents = districtDataCache[district];
+
+      if (!term) {
+        const schoolVal = schoolSel.value;
+        if (schoolVal === '__ALL__') {
+          currentStudents = allDistrictStudents;
+        } else if (schoolVal) {
+          currentStudents = allDistrictStudents.filter(s =>
+            (s.udise && s.udise === schoolVal) || s.school === schoolVal
+          );
+        } else {
+          currentStudents = [];
+          renderTablePrompt('Please select a school or type UDISE/Name to view student list.');
+          setStatus('', '');
+          return;
+        }
+        renderTable(currentStudents);
+        const visibleCount = displayedStudents.length;
+        setStatus(`${visibleCount} student(s) found.`, '');
+        return;
+      }
+
+      // Filter all district students by UDISE, School Name, Student Name, PEN, Father Name, Block
+      currentStudents = allDistrictStudents.filter(s =>
+        (s.udise && String(s.udise).toLowerCase().includes(term)) ||
+        (s.school && String(s.school).toLowerCase().includes(term)) ||
+        (s.name && String(s.name).toLowerCase().includes(term)) ||
+        (s.pen && String(s.pen).toLowerCase().includes(term)) ||
+        (s.father && String(s.father).toLowerCase().includes(term)) ||
+        (s.block && String(s.block).toLowerCase().includes(term))
+      );
+
+      // Auto-select in schoolSel if UDISE or School exact/unique match
+      for (let i = 0; i < schoolSel.options.length; i++) {
+        const opt = schoolSel.options[i];
+        if (opt.value && opt.value !== '__ALL__') {
+          if (opt.value.toLowerCase() === term || opt.text.toLowerCase().includes(term)) {
+            schoolSel.value = opt.value;
+            break;
+          }
+        }
+      }
+
+      renderTable(currentStudents);
+      const visibleCount = displayedStudents.length;
+      setStatus(`Filtered ${visibleCount} student(s) matching "${term}".`, '');
+    });
+
+    document.getElementById('chkHideCompleted').addEventListener('change', function () {
+      const district = document.getElementById('districtSelect').value;
+      if (!district || !districtDataCache[district]) return;
+
+      const schoolVal = document.getElementById('schoolSelect').value;
+      updateSchoolDropdown(district, schoolVal);
+
+      if (currentStudents && currentStudents.length > 0) {
+        renderTable(currentStudents);
+      }
+    });
+
+    function renderTablePrompt(msg) {
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = `<tr><td colspan="12" style="color:var(--muted);padding:30px;text-align:center;">${escapeHtml(msg)}</td></tr>`;
+    }
+
+    function renderTableLoading(msg) {
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = `<tr><td colspan="12" style="color:var(--navy);padding:30px;text-align:center;"><span class="btn-spinner" style="border-top-color:var(--navy);"></span> ${escapeHtml(msg)}</td></tr>`;
+    }
+
+    function renderTableError(msg, district, schoolVal) {
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = `<tr><td colspan="12" style="color:var(--red);padding:20px;text-align:center;">${escapeHtml(msg)}<br><br><button type="button" onclick="retryFetch('${escapeHtml(district)}', '${escapeHtml(schoolVal)}')">Re-try</button></td></tr>`;
+    }
+
+    function retryFetch(district, schoolVal) {
+      delete studentCache[district + '_' + schoolVal];
+      document.getElementById('schoolSelect').dispatchEvent(new Event('change'));
+    }
+
+    function statusBadge(status, reason) {
+      if (reason === 'Death') return '<span class="badge badge-deceased">Death</span>';
+      if (status === 'Studying') return '<span class="badge badge-studying">Studying</span>';
+      if (status === 'Not Studying') return '<span class="badge badge-notstudying">Not Studying</span>';
+      return '<span class="badge badge-none">Not recorded</span>';
+    }
+
+    function renderTable(list) {
+      const hideCompleted = document.getElementById('chkHideCompleted')?.checked;
+      const visible = hideCompleted ? list.filter(s => !isStudentRecorded(s)) : list;
+      displayedStudents = visible;
+
+      const tbody = document.getElementById('tbody');
+      if (!visible.length) {
+        if (hideCompleted && list.length > 0) {
+          tbody.innerHTML = '<tr><td colspan="12" style="color:var(--green);padding:30px;text-align:center;font-weight:600;">🎉 इस चयन के सभी छात्र मार्क (अपडेट) हो चुके हैं! कोई छात्र शेष नहीं है।<br><span style="font-size:0.8rem;color:var(--muted);font-weight:normal;">(पहले भरे हुए छात्रों को देखने के लिए ऊपर चेकबॉक्स अनचेक करें)</span></td></tr>';
+        } else {
+          tbody.innerHTML = '<tr><td colspan="12" style="color:var(--muted);padding:20px;text-align:center;">No students found.</td></tr>';
+        }
+        updateCountsDisplay();
+        return;
+      }
+
+      tbody.innerHTML = visible.map((s, i) => `
+        <tr>
+          <td>${escapeHtml(s.block)}</td>
+          <td>${escapeHtml(s.udise)}</td>
+          <td class="col-school" title="${escapeHtml(s.school)}">${escapeHtml(s.school)}</td>
+          <td>${escapeHtml(s.pen)}</td>
+          <td>${escapeHtml(s.name)}</td>
+          <td>${escapeHtml(s.sex)}</td>
+          <td>${escapeHtml(s.mobile)}</td>
+          <td>${escapeHtml(s.mother)}</td>
+          <td>${escapeHtml(s.father)}</td>
+          <td>${escapeHtml(s.studentClass)}</td>
+          <td>${statusBadge(s.currentStatus, s.reason)}</td>
+          <td><button onclick="openModal(${i})">वर्तमान स्थिति</button></td>
+        </tr>
+      `).join('');
+
+      updateCountsDisplay();
+    }
+
+    function openModal(index) {
+      activeStudent = displayedStudents[index];
+      answers = {
+        currentStatus: activeStudent.currentStatus || '',
+        willing: activeStudent.willing || '',
+        mode: activeStudent.mode || '',
+        targetClass: activeStudent.targetClass || activeStudent.eligibleClass || '',
+        reason: activeStudent.reason || '',
+      };
+      document.getElementById('modalName').textContent = activeStudent.name;
+      document.getElementById('modalMeta').textContent =
+        `पिता: ${activeStudent.father} | कक्षा: ${activeStudent.studentClass} | PEN: ${activeStudent.pen} | ${activeStudent.school}`;
+      document.getElementById('remarksBox').value = '';
+      document.getElementById('reasonSelect').value = answers.reason;
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = false;
+      saveBtn.classList.remove('success');
+      saveBtn.textContent = 'सहेजें';
+      document.getElementById('modalError').textContent = '';
+      refreshRadios();
+      document.getElementById('overlay').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('overlay').classList.remove('show');
+      activeStudent = null;
+    }
+
+    function refreshRadios() {
+      setRadioGroup('q1', answers.currentStatus, (val) => {
+        answers.currentStatus = val;
+        answers.willing = ''; answers.mode = ''; answers.targetClass = ''; answers.reason = '';
+        refreshRadios();
+      });
+      setRadioGroup('q2', answers.willing, (val) => {
+        answers.willing = val;
+        if (val !== 'Yes') {
+          answers.mode = ''; answers.targetClass = '';
+        }
+        refreshRadios();
+      });
+      setRadioGroup('q3', answers.mode, (val) => { answers.mode = val; refreshRadios(); });
+      setRadioGroup('targetClassRadios', answers.targetClass, (val) => { answers.targetClass = val; refreshRadios(); });
+
+      document.getElementById('q2group').classList.toggle('hidden', answers.currentStatus !== 'Not Studying');
+      document.getElementById('q3group').classList.toggle('hidden', answers.willing !== 'Yes');
+      document.getElementById('targetClassGroup').classList.toggle('hidden', answers.willing !== 'Yes');
+      document.getElementById('q4group').classList.toggle('hidden', answers.willing !== 'No');
+    }
+
+    function setRadioGroup(groupId, selectedValue, onPick) {
+      const group = document.getElementById(groupId);
+      Array.from(group.children).forEach(opt => {
+        opt.classList.toggle('selected', opt.dataset.value === selectedValue);
+        opt.onclick = () => onPick(opt.dataset.value);
+      });
+    }
+
+    document.getElementById('reasonSelect').addEventListener('change', function () {
+      answers.reason = this.value;
+    });
+
+    function showSaveLoader(studentName) {
+      document.getElementById('saveLoaderTitle').textContent = `${studentName} के लिए डाटा सहेजा जा रहा है...`;
+      document.getElementById('saveLoaderOverlay').classList.remove('hidden');
+    }
+
+    function hideSaveLoader() {
+      document.getElementById('saveLoaderOverlay').classList.add('hidden');
+    }
+
+    let successPopupTimer = null;
+    function showSuccessPopup(studentName, isOffline) {
+      document.getElementById('successPopupTitle').textContent = `सफलतापूर्वक सहेजा गया!`;
+      if (isOffline) {
+        document.getElementById('successPopupMsg').textContent = `${studentName} का रिकॉर्ड सहेज लिया गया है (Google Sheet बैकग्राउंड में अपडेट होगा)।`;
+      } else {
+        document.getElementById('successPopupMsg').textContent = `${studentName} का रिकॉर्ड सफलतापूर्वक Google Sheets में अपडेट कर दिया गया है।`;
+      }
+      document.getElementById('successPopupOverlay').classList.remove('hidden');
+
+      if (successPopupTimer) clearTimeout(successPopupTimer);
+      successPopupTimer = setTimeout(closeSuccessPopup, 2800);
+    }
+
+    function closeSuccessPopup() {
+      document.getElementById('successPopupOverlay').classList.add('hidden');
+      if (successPopupTimer) clearTimeout(successPopupTimer);
+    }
+
+    async function saveEntry() {
+      if (!activeStudent) return;
+      if (!answers.currentStatus) {
+        document.getElementById('modalError').textContent = 'कृपया बताएं कि छात्र वर्तमान में पढ़ रहा है या नहीं।';
+        return;
+      }
+      if (answers.currentStatus === 'Not Studying' && !answers.willing) {
+        document.getElementById('modalError').textContent = 'कृपया बताएं कि छात्र आगे पढ़ने के लिए इच्छुक है या नहीं।';
+        return;
+      }
+      if (answers.willing === 'Yes' && !answers.mode) {
+        document.getElementById('modalError').textContent = 'कृपया अध्ययन का माध्यम चुनें (Regular / NIOS)।';
+        return;
+      }
+      if (answers.willing === 'Yes' && !answers.targetClass) {
+        document.getElementById('modalError').textContent = 'किस कक्षा में प्रवेश लेना चाहते हैं? कृपया कक्षा 9, 10, 11 या 12 चुनें।';
+        return;
+      }
+      if (answers.willing === 'No' && !answers.reason) {
+        document.getElementById('modalError').textContent = 'कृपया एक कारण चुनें।';
+        return;
+      }
+      document.getElementById('modalError').textContent = '';
+
+      const payload = {
+        district: activeStudent.district || document.getElementById('districtSelect').value,
+        block: activeStudent.block,
+        udise: activeStudent.udise,
+        school: activeStudent.school,
+        pen: activeStudent.pen,
+        studentName: activeStudent.name,
+        sex: activeStudent.sex,
+        mobile: activeStudent.mobile,
+        motherName: activeStudent.mother,
+        fatherName: activeStudent.father,
+        subStatus: activeStudent.subStatus,
+        studentClass: activeStudent.studentClass,
+        eligibleClass: answers.targetClass || activeStudent.eligibleClass || '',
+        targetClass: answers.targetClass || '',
+        academicYear: activeStudent.academicYear,
+        currentStatus: answers.currentStatus,
+        willing: answers.currentStatus === 'Not Studying' ? answers.willing : '',
+        mode: answers.mode,
+        reason: answers.reason,
+        collectedBy: document.getElementById('collectedBy').value,
+        remarks: document.getElementById('remarksBox').value,
+      };
+
+      // Optimistically update in-memory student object and table UI instantly (0ms delay)
+      const targetStudent = activeStudent;
+      targetStudent.currentStatus = answers.currentStatus;
+      targetStudent.willing = payload.willing;
+      targetStudent.mode = answers.mode;
+      targetStudent.eligibleClass = payload.eligibleClass;
+      targetStudent.targetClass = answers.targetClass;
+      targetStudent.reason = answers.reason;
+      renderTable(currentStudents);
+
+      const district = document.getElementById('districtSelect').value;
+      updateSchoolDropdown(district);
+
       closeModal();
-      renderTable();
-    } else {
-      document.getElementById('modalError').textContent = 'सहेजने में विफल: ' + (res.message || res.error);
+      showSaveLoader(targetStudent.name);
+
+      // Submit API payload asynchronously in background with animated circle loader & popup
+      apiPost('submit', payload).then(() => {
+        hideSaveLoader();
+        showSuccessPopup(targetStudent.name, false);
+        setStatus(`Status saved successfully for ${targetStudent.name}.`, 'success');
+        syncPendingSubmissions();
+      }).catch(err => {
+        console.error('Background submit error:', err);
+        enqueuePendingSubmission(payload);
+        hideSaveLoader();
+        showSuccessPopup(targetStudent.name, true);
+        setStatus(`Status for ${targetStudent.name} saved in browser storage (Pending Google Sheet sync).`, 'warning');
+      });
     }
-  } catch(e) {
-    document.getElementById('modalError').textContent = 'त्रुटि: ' + e.message;
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'सहेजें';
-  }
-}
 
-async function resetAppCache() {
-  localStorage.clear();
-  sessionStorage.clear();
-  document.getElementById('loadingOverlay').style.display = 'flex';
-  try {
-    await apiCall({ action: 'clearCache' });
-  } catch(e){}
-  location.reload(true);
-}
-
-function h(s) {
-  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-initDistricts();
-</script>
+    function escapeHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+  </script>
 </body>
 </html>
